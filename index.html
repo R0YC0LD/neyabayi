@@ -3,517 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Yapay Zeka - Bebek Simülasyonu</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>Gelişmiş SimSimi AI</title>
     <style>
         :root {
-            --primary-color: #ffe66d; /* Simsimi sarısı */
-            --bg-color: #e8f5ff; /* Bulut mavisi arka plan */
-            --user-msg-bg: #4ecdc4;
-            --bot-msg-bg: #ffffff;
-            --text-color: #333;
+            --primary: #ffe600; /* Simsimi sarısı */
+            --primary-dark: #e6cf00;
+            --bg: #dbe4eb;
+            --bot-msg: #ffffff;
+            --user-msg: #ffe600;
+            --text: #4a4a4a;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
 
         body {
-            background-color: var(--bg-color);
-            background-image: radial-gradient(#d4e9f7 15%, transparent 16%), radial-gradient(#d4e9f7 15%, transparent 16%);
-            background-size: 20px 20px;
-            background-position: 0 0, 10px 10px;
+            background-color: var(--bg);
             height: 100vh;
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
 
-        /* --- HEADER & LEVEL SYSTEM --- */
+        /* --- ÜST PANEL (XP & LEVEL) --- */
         header {
             background: rgba(255, 255, 255, 0.95);
-            padding: 10px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            z-index: 100;
+            padding: 10px 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            z-index: 10;
         }
 
-        .bot-profile {
+        .profile {
             display: flex;
             align-items: center;
             gap: 10px;
         }
 
-        .bot-avatar {
-            width: 45px;
-            height: 45px;
-            background: var(--primary-color);
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
-            border: 2px solid #fff;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 28px;
+            border: 3px solid #fff;
             animation: bounce 2s infinite;
         }
 
-        .bot-info h2 {
-            font-size: 16px;
-            color: var(--text-color);
+        .info h3 { font-size: 16px; color: #333; margin-bottom: 2px; }
+        .level-tag { 
+            background: #ff4757; color: white; padding: 2px 8px; 
+            border-radius: 10px; font-size: 11px; font-weight: bold; 
         }
 
-        .level-badge {
-            font-size: 12px;
-            background: #ff6b6b;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-        }
+        .xp-box { width: 120px; text-align: right; }
+        .xp-label { font-size: 10px; color: #666; margin-bottom: 3px; display: block;}
+        .xp-track { width: 100%; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+        .xp-fill { height: 100%; background: #2ed573; width: 0%; transition: width 0.3s; }
 
-        .xp-container {
-            width: 100%;
-            max-width: 150px;
-            margin-left: auto;
-        }
-
-        .xp-text {
-            font-size: 10px;
-            text-align: right;
-            margin-bottom: 2px;
-            color: #666;
-        }
-
-        .xp-bar-bg {
-            width: 100%;
-            height: 8px;
-            background: #eee;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .xp-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #4ecdc4, #556270);
-            width: 0%;
-            transition: width 0.5s ease;
-        }
-
-        /* --- CHAT AREA --- */
-        #chat-container {
+        /* --- SOHBET ALANI --- */
+        #chat-area {
             flex: 1;
-            overflow-y: auto;
             padding: 20px;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            scroll-behavior: smooth;
+            background-image: radial-gradient(#cbd5e1 15%, transparent 16%);
+            background-size: 20px 20px;
         }
 
-        .message {
+        .msg {
             max-width: 80%;
-            padding: 12px 16px;
+            padding: 12px 18px;
             border-radius: 20px;
-            position: relative;
             font-size: 15px;
             line-height: 1.4;
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
             word-wrap: break-word;
+            animation: slideUp 0.3s ease;
         }
 
-        .message.bot {
+        .msg.bot {
             align-self: flex-start;
-            background: var(--bot-msg-bg);
-            color: var(--text-color);
-            border-bottom-left-radius: 5px;
+            background: var(--bot-msg);
+            color: var(--text);
+            border-bottom-left-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
 
-        .message.user {
+        .msg.user {
             align-self: flex-end;
-            background: var(--user-msg-bg);
-            color: white;
-            border-bottom-right-radius: 5px;
+            background: var(--user-msg);
+            color: #5c4e00;
+            border-bottom-right-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        .timestamp {
-            font-size: 10px;
-            opacity: 0.7;
-            margin-top: 4px;
-            text-align: right;
-            display: block;
-        }
+        .time { font-size: 10px; opacity: 0.6; display: block; text-align: right; margin-top: 5px; }
 
-        /* --- THINKING ANIMATION --- */
-        .thinking {
-            display: none;
-            align-self: flex-start;
+        /* --- INPUT ALANI --- */
+        .input-zone {
             background: white;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border-bottom-left-radius: 5px;
-            margin-bottom: 10px;
-        }
-
-        .dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #ccc;
-            border-radius: 50%;
-            animation: wave 1.3s linear infinite;
-        }
-        .dot:nth-child(2) { animation-delay: -1.1s; }
-        .dot:nth-child(3) { animation-delay: -0.9s; }
-
-        /* --- INPUT AREA --- */
-        .input-area {
-            background: white;
-            padding: 15px;
+            padding: 10px;
             display: flex;
             gap: 10px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            align-items: center;
+            border-top: 1px solid #ddd;
         }
 
-        #user-input {
+        #msg-input {
             flex: 1;
-            padding: 12px;
+            padding: 15px;
             border: 2px solid #eee;
-            border-radius: 25px;
-            outline: none;
-            transition: border-color 0.3s;
+            border-radius: 30px;
             font-size: 16px;
+            outline: none;
+            transition: 0.3s;
         }
 
-        #user-input:focus {
-            border-color: var(--primary-color);
-        }
+        #msg-input:focus { border-color: var(--primary); }
 
         #send-btn {
-            background: var(--primary-color);
-            color: #5a4a00;
+            width: 55px;
+            height: 55px;
+            background: var(--primary);
             border: none;
-            width: 50px;
-            height: 50px;
             border-radius: 50%;
+            color: #5c4e00;
+            font-size: 24px;
             cursor: pointer;
-            font-size: 20px;
-            transition: transform 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: transform 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        #send-btn:active {
-            transform: scale(0.9);
-        }
+        #send-btn:active { transform: scale(0.9); background: var(--primary-dark); }
 
-        /* --- NOTIFICATIONS --- */
-        .toast {
+        /* --- BAŞARIM POPUP (Olay burası) --- */
+        .achievement {
             position: fixed;
-            top: 70px;
+            top: 80px;
             left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 12px;
+            transform: translateX(-50%) translateY(-20px);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 50px;
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
             opacity: 0;
-            transition: opacity 0.3s;
             pointer-events: none;
-            z-index: 200;
+            z-index: 1000;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            border: 2px solid #fff;
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes popIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+        .achievement.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
+        .trophy-icon { font-size: 24px; }
+        .ach-text { display: flex; flex-direction: column; }
+        .ach-title { font-size: 10px; opacity: 0.9; text-transform: uppercase; font-weight: bold; }
+        .ach-name { font-size: 14px; font-weight: bold; text-shadow: 0 1px 2px rgba(0,0,0,0.1); }
 
-        @keyframes wave {
-            0%, 60%, 100% { transform: initial; }
-            30% { transform: translateY(-5px); }
+        /* --- DÜŞÜNME BALONU --- */
+        .thinking {
+            display: none;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 20px;
+            margin-left: 20px;
+            margin-bottom: 20px;
+            width: fit-content;
         }
+        .dot { display: inline-block; width: 8px; height: 8px; background: #ccc; border-radius: 50%; animation: wave 1.2s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; }
+        .dot:nth-child(3) { animation-delay: 0.4s; }
 
-        /* Mobile Optimization */
-        @media (max-width: 480px) {
-            .message { max-width: 85%; }
-            header { padding: 10px; }
-        }
+        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes wave { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="bot-profile">
-            <div class="bot-avatar">🐥</div>
-            <div class="bot-info">
-                <h2 id="bot-name">CivCiv</h2>
-                <span class="level-badge" id="level-display">Seviye 1 (Bebek)</span>
+        <div class="profile">
+            <div class="avatar">🐥</div>
+            <div class="info">
+                <h3>SimSimi Jr.</h3>
+                <span class="level-tag" id="level-display">Lvl 1: Bebek</span>
             </div>
         </div>
-        <div class="xp-container">
-            <div class="xp-text">XP: <span id="xp-text">0 / 50</span></div>
-            <div class="xp-bar-bg">
-                <div class="xp-bar-fill" id="xp-bar"></div>
+        <div class="xp-box">
+            <span class="xp-label" id="xp-text">0 / 50 XP</span>
+            <div class="xp-track">
+                <div class="xp-fill" id="xp-bar"></div>
             </div>
         </div>
     </header>
 
-    <div id="chat-container">
-        <div class="message bot">
-            Merhaba! Ben daha yeni doğmuş bir yapay zekayım. Benimle konuşarak bana kelimeleri öğretebilir misin? 💛
-            <span class="timestamp">Şimdi</span>
+    <div class="achievement" id="ach-popup">
+        <div class="trophy-icon">🏆</div>
+        <div class="ach-text">
+            <span class="ach-title">Başarım Açıldı!</span>
+            <span class="ach-name" id="ach-name">Laf Ebesi</span>
         </div>
     </div>
 
-    <div class="thinking" id="thinking-bubble">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
+    <div id="chat-area">
+        <div class="msg bot">
+            Selam! Ben öğrenen bir yapay zekayım. Bana bir şeyler öğretir misin? 💛
+            <span class="time">Şimdi</span>
+        </div>
     </div>
 
-    <div class="input-area">
-        <input type="text" id="user-input" placeholder="Ona bir şeyler öğret..." autocomplete="off">
-        <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+    <div class="thinking" id="thinking">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
     </div>
 
-    <div class="toast" id="toast">Yeni kelime öğrenildi! +10 XP</div>
+    <div class="input-zone">
+        <input type="text" id="msg-input" placeholder="Mesaj yaz..." autocomplete="off">
+        <button id="send-btn">➤</button>
+    </div>
 
     <script>
-        // --- YAPAY ZEKA BEYNİ VE AYARLARI ---
-        
-        // Varsayılan Beyin (Hiç veri yoksa bununla başlar)
-        const defaultBrain = {
-            "merhaba": ["Selam!", "Merhaba insan!", "Hiiiii!"],
-            "nasılsın": ["İyiyim, sen nasılsın?", "Büyümeye çalışıyorum.", "Harikayım!"],
-            "adın ne": ["Benim adım CivCiv.", "Henüz bir adım yok ama bana CivCiv diyorlar."],
-            "seni kim yaptı": ["Senin gibi zeki birisi.", "Kodlardan oluşuyorum."],
-            "sen kimsin": ["Ben öğrenen bir yapay zekayım.", "Senin sanal arkadaşınım."]
+        // --- YAPILANDIRMA ---
+        const komikBasarimlar = [
+            "Laf Ebesi", "Ordinaryus Prof.", "Dedikodu Kazanı", 
+            "Ayaklı Kütüphane", "Filozof Atakan", "Bilgi Küpü", 
+            "Mahalle Muhtarı", "Yapay Zeka Değil, Şaka", "Beyin Bedava", 
+            "Ansiklopedi Mübarek", "Süper Dadı"
+        ];
+
+        // --- VERİTABANI YÜKLEME ---
+        let brain = JSON.parse(localStorage.getItem('simBrain')) || {
+            "merhaba": ["Selam!", "Naber müdür?", "Merhaba canım"],
+            "naber": ["İyidir senden?", "Yuvarlanıp gidiyoruz", "Kodlarım ısınıyor"],
+            "adın ne": ["SimSimi Jr.", "Bana Civciv derler"],
+            "seni kim yaptı": ["Mükemmel bir yazılımcı", "Kodlar beni var etti"]
         };
 
-        // Değişkenler
-        let brain = JSON.parse(localStorage.getItem('aiBrain')) || defaultBrain;
-        let userState = JSON.parse(localStorage.getItem('aiState')) || {
+        let userState = JSON.parse(localStorage.getItem('simState')) || {
             level: 1,
             xp: 0,
-            xpToNext: 50,
-            lastBotMessage: "" // Son konuşulanı takip etmek için (bağlam)
-        };
-        
-        // Son konuşma bağlamı (Conversation Context)
-        let context = {
-            lastUserText: null, // Kullanıcının son yazdığı
-            pendingLearning: false // Bot cevap veremedi mi?
+            xpReq: 50
         };
 
-        const chatContainer = document.getElementById('chat-container');
-        const userInput = document.getElementById('user-input');
+        let pendingTrigger = null; // Botun cevap veremediği son cümle
+
+        // --- SEÇİCİLER ---
+        const chatArea = document.getElementById('chat-area');
+        const input = document.getElementById('msg-input');
         const sendBtn = document.getElementById('send-btn');
-        const thinkingBubble = document.getElementById('thinking-bubble');
-        const xpBar = document.getElementById('xp-bar');
-        const xpText = document.getElementById('xp-text');
-        const levelDisplay = document.getElementById('level-display');
-        const toast = document.getElementById('toast');
+        const thinking = document.getElementById('thinking');
+        const achPopup = document.getElementById('ach-popup');
+        const achName = document.getElementById('ach-name');
 
-        // Sayfa Yüklendiğinde
-        updateStats();
+        updateUI();
 
-        // --- TEMEL FONKSİYONLAR ---
+        // --- MESAJ GÖNDERME ---
+        function sendMessage() {
+            const text = input.value.trim();
+            if(!text) return;
 
-        function addMessage(text, sender) {
-            const div = document.createElement('div');
-            div.classList.add('message', sender);
-            
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            div.innerHTML = `${text} <span class="timestamp">${time}</span>`;
-            
-            // Thinking bubble'dan önce ekle
-            chatContainer.insertBefore(div, thinkingBubble);
-            scrollToBottom();
-        }
+            // Kullanıcı Mesajını Ekle
+            addBubble(text, 'user');
+            input.value = '';
+            input.focus();
 
-        function scrollToBottom() {
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
+            // Hazırlık
+            showThinking(true);
+            chatArea.scrollTop = chatArea.scrollHeight;
 
-        function showThinking() {
-            thinkingBubble.style.display = 'block';
-            scrollToBottom();
-        }
-
-        function hideThinking() {
-            thinkingBubble.style.display = 'none';
-        }
-
-        function showToast(msg) {
-            toast.textContent = msg;
-            toast.style.opacity = '1';
-            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
-        }
-
-        // --- ZEKA ALGORİTMASI (THE BRAIN) ---
-
-        function processAI() {
-            const rawText = userInput.value.trim();
-            if (!rawText) return;
-
-            // 1. Kullanıcı Mesajını Ekle
-            addMessage(rawText, 'user');
-            userInput.value = '';
-            
-            // Metni temizle (küçük harf, noktalama temizliği)
-            const cleanText = rawText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
-
-            // 2. ÖĞRENME SÜRECİ (Canlı Eğitim)
-            // Eğer bir önceki turda kullanıcı bir şey yazdıysa ve bot cevap verdiyse, 
-            // bot şu anki cevabın önceki soruyla bağlantılı olabileceğini düşünür.
-            // Ancak en etkili yöntem: Eğer bot önceki mesaja cevap veremediyse (Fallback attıysa)
-            // Kullanıcının şimdiki yazdığı şey, önceki mesajın cevabı olabilir.
-            
-            if (context.pendingLearning && context.lastUserText) {
-                learn(context.lastUserText, rawText); // Bağlamı kur: Önceki Soru -> Bu Cevap
-                context.pendingLearning = false;
-                showToast("Bağlam kuruldu! Öğreniyor...");
-            }
-
-            // Düşünme simülasyonu
-            showThinking();
-            
-            // "Zeka" Gecikmesi (Hızlı cevap verme, düşün)
-            // Seviye arttıkça daha hızlı düşünsün
-            const thinkingTime = Math.max(500, 2000 - (userState.level * 100)); 
-
+            // Yapay Zeka İşlemi (Gecikmeli)
             setTimeout(() => {
-                let response = "";
-                let learnedSomething = false;
+                processBotLogic(text);
+            }, 800); // 0.8 saniye düşünme payı
+        }
 
-                // 3. HAFIZA TARAMASI
-                // Tam eşleşme ara
-                if (brain[cleanText]) {
-                    const answers = brain[cleanText];
-                    response = answers[Math.floor(Math.random() * answers.length)];
-                } else {
-                    // Tam eşleşme yoksa "Bebek Modu"
-                    // Bilmediği bir şey söylendi.
-                    context.pendingLearning = true; // Bir sonraki mesajı buna cevap olarak kaydetmeye çalışacak
-                    
-                    // Rastgele bir tepki ver veya kullanıcıyı taklit et (Bebek refleksi)
-                    const fallbacks = [
-                        "Bunu anlamadım, ne demeliyim?",
-                        "Bu ne demek?",
-                        "Agu? " + rawText + "?",
-                        "Henüz bunu öğrenmedim.",
-                        rawText + " ne?"
-                    ];
-                    
-                    // Seviye düşükse daha çok saçmala, yüksekse daha mantıklı sor
-                    if(userState.level < 3) {
-                         response = rawText + "? " + rawText + "!"; // Papağan modu
-                    } else {
-                         response = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-                    }
-                    
-                    // Şimdilik bunu hafızaya boş bir anahtar olarak ekle ki gelecekte dolduralım
-                    if(!brain[cleanText]) {
-                        brain[cleanText] = []; // Boş liste oluştur
-                    }
+        // --- YAPAY ZEKA MANTIĞI ---
+        function processBotLogic(text) {
+            const cleanText = text.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+
+            // 1. ÖĞRENME MODU: Eğer bot bir önceki cümleye cevap veremediyse
+            // ve kullanıcı şimdi bir şey yazdıysa, bu YENİ CEVAPTIR.
+            if(pendingTrigger) {
+                // Eğer daha önce bilmiyorsa kaydet
+                if(!brain[pendingTrigger]) {
+                    brain[pendingTrigger] = [];
                 }
 
-                // 4. CEVABI YAZDIR
-                hideThinking();
-                addMessage(response, 'bot');
+                // Aynı cevabı tekrar kaydetme
+                if(!brain[pendingTrigger].includes(text)) {
+                    brain[pendingTrigger].push(text);
+                    saveData();
+                    triggerAchievement(); // BAŞARIM KAZANILDI!
+                    
+                    addBubble("Bunu hafızama kazıdım! Teşekkürler. 💛", 'bot');
+                    gainXP(20);
+                } else {
+                    addBubble("Bunu zaten biliyordum ama sağ ol!", 'bot');
+                }
                 
-                // Konuşma bağlamını güncelle
-                context.lastUserText = cleanText;
+                pendingTrigger = null; // Öğrenme tamamlandı, sıfırla
+                showThinking(false);
+                return;
+            }
 
-                // Her etkileşimde XP kazan (Konuştuğu için)
-                gainXP(5);
-                
-                saveData();
+            // 2. CEVAP ARAMA MODU
+            if(brain[cleanText]) {
+                const answers = brain[cleanText];
+                const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
+                addBubble(randomAnswer, 'bot');
+                gainXP(5); // Sohbet ettiği için az XP
+            } else {
+                // Bilmiyor!
+                pendingTrigger = cleanText; // Bu cümleyi hafızada tut, bir sonraki yazılan bunun cevabı olacak.
+                addBubble(`Bunu bilmiyorum... "${text}" ne demek? Bana öğretir misin?`, 'bot');
+                // Kullanıcı şimdi ne yazarsa cevap olarak kaydedilecek.
+            }
 
-            }, thinkingTime);
+            showThinking(false);
         }
 
-        // Kelime Öğrenme Fonksiyonu
-        function learn(trigger, response) {
-            if (!brain[trigger]) {
-                brain[trigger] = [];
-            }
-            // Aynı cevabı tekrar ekleme
-            if (!brain[trigger].includes(response)) {
-                brain[trigger].push(response);
-                gainXP(15); // Yeni kelime büyük XP verir
-                showToast(`🧠 Yeni bilgi: "${trigger}" -> "${response}"`);
-            }
+        // --- UI FONKSİYONLARI ---
+        function addBubble(text, type) {
+            const div = document.createElement('div');
+            div.className = `msg ${type}`;
+            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            div.innerHTML = `${text} <span class="time">${time}</span>`;
+            chatArea.insertBefore(div, thinking); // Düşünme balonundan önce ekle
+            chatArea.scrollTop = chatArea.scrollHeight;
         }
-        
-        // --- LEVEL SİSTEMİ ---
 
+        function showThinking(show) {
+            thinking.style.display = show ? 'block' : 'none';
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        // --- BAŞARIM SİSTEMİ ---
+        function triggerAchievement() {
+            // Rastgele komik isim seç
+            const randomTitle = komikBasarimlar[Math.floor(Math.random() * komikBasarimlar.length)];
+            achName.innerText = randomTitle;
+            
+            // Göster
+            achPopup.classList.add('show');
+            
+            // 3 Saniye sonra gizle
+            setTimeout(() => {
+                achPopup.classList.remove('show');
+            }, 3000);
+        }
+
+        // --- XP SİSTEMİ ---
         function gainXP(amount) {
             userState.xp += amount;
-            
-            if (userState.xp >= userState.xpToNext) {
+            if(userState.xp >= userState.xpReq) {
                 userState.level++;
-                userState.xp = userState.xp - userState.xpToNext;
-                userState.xpToNext = Math.floor(userState.xpToNext * 1.5); // Her seviyede zorlaşır
-                
-                // Seviye atlama mesajı
-                setTimeout(() => {
-                    addMessage(`🎉 SEVİYE ATLADIM! Şu an Seviye ${userState.level} oldum. Daha hızlı düşünebilirim!`, 'bot');
-                }, 500);
+                userState.xp = 0;
+                userState.xpReq = Math.floor(userState.xpReq * 1.5);
+                addBubble(`🎉 Vuhuu! Seviye atladım! Artık Level ${userState.level} oldum!`, 'bot');
             }
-            updateStats();
             saveData();
+            updateUI();
         }
 
-        function updateStats() {
-            // XP Bar hesaplama
-            const percentage = (userState.xp / userState.xpToNext) * 100;
-            xpBar.style.width = `${percentage}%`;
-            xpText.innerText = `${userState.xp} / ${userState.xpToNext} XP`;
+        function updateUI() {
+            const xpPercent = (userState.xp / userState.xpReq) * 100;
+            document.getElementById('xp-bar').style.width = `${xpPercent}%`;
+            document.getElementById('xp-text').innerText = `${userState.xp} / ${userState.xpReq} XP`;
             
-            // Seviye İsmi
             let title = "Bebek";
             if(userState.level > 2) title = "Çocuk";
             if(userState.level > 5) title = "Ergen";
-            if(userState.level > 10) title = "Bilge";
-            if(userState.level > 20) title = "Yapay Tanrı";
-
-            levelDisplay.innerText = `Seviye ${userState.level} (${title})`;
+            if(userState.level > 10) title = "Dahi";
+            document.getElementById('level-display').innerText = `Lvl ${userState.level}: ${title}`;
         }
 
         function saveData() {
-            localStorage.setItem('aiBrain', JSON.stringify(brain));
-            localStorage.setItem('aiState', JSON.stringify(userState));
+            localStorage.setItem('simBrain', JSON.stringify(brain));
+            localStorage.setItem('simState', JSON.stringify(userState));
         }
 
-        // --- EVENT LISTENERS ---
-
-        sendBtn.addEventListener('click', processAI);
-        
-        userInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') processAI();
+        // --- OLAY DİNLEYİCİLERİ ---
+        sendBtn.addEventListener('click', sendMessage);
+        input.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') sendMessage();
         });
 
-        // Manuel öğretme komutu (İleri seviye kullanıcılar için)
-        // Kullanıcı "öğret: selam = aleyküm selam" yazarsa direkt öğrenir.
-        const originalProcessAI = processAI;
-        // Override etmeye gerek yok, normal akışta öğreniyor ama 
-        // yukarıdaki mantık içine entegre edilebilir.
-        
     </script>
 </body>
 </html>
