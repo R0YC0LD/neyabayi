@@ -3,941 +3,789 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>NIGHT SHADE AI | ULTIMATE AUTOPILOT DJ SYSTEM v3.0</title>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+    <title>PHANTOM NEURAL DJ v4.0 | SELF-LEARNING AI SYSTEM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        /* --- CORE VARIABLES & RESET --- */
+        /* --- RESET & VARIABLES --- */
         :root {
-            --primary-hue: 180; /* Cyan */
-            --secondary-hue: 300; /* Magenta */
+            --bg-dark: #05070a;
+            --panel-dark: #0f1216;
+            --primary: #00f2ff; /* Cyber Cyan */
+            --secondary: #7000ff; /* Electric Purple */
+            --alert: #ff003c;
+            --success: #00ff9d;
             
-            --color-bg: #050505;
-            --color-panel: #111;
-            --color-surface: #1a1a1a;
+            --glass: rgba(15, 18, 22, 0.85);
+            --border: 1px solid rgba(255, 255, 255, 0.08);
             
-            --neon-blue: hsl(var(--primary-hue), 100%, 50%);
-            --neon-pink: hsl(var(--secondary-hue), 100%, 50%);
-            --neon-green: #00ff41;
-            --neon-red: #ff003c;
-            
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --glass-bg: rgba(20, 20, 20, 0.6);
-            
-            --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+            --shadow-glow: 0 0 20px rgba(0, 242, 255, 0.15);
         }
 
-        * { box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
+        * { box-sizing: border-box; outline: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+
         body {
             margin: 0; padding: 0;
-            background-color: var(--color-bg);
+            width: 100vw; height: 100vh;
+            background: var(--bg-dark);
             background-image: 
-                radial-gradient(circle at 50% 50%, #111 0%, #000 100%),
-                linear-gradient(rgba(0,0,0,0.5) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0,0,0,0.5) 1px, transparent 1px);
-            background-size: 100% 100%, 40px 40px, 40px 40px;
+                radial-gradient(circle at 50% 0%, #1a1a2e 0%, var(--bg-dark) 60%),
+                linear-gradient(0deg, rgba(0,0,0,0.8), transparent);
             color: #fff;
-            font-family: 'Rajdhani', sans-serif;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            user-select: none;
+            font-family: 'Exo 2', sans-serif;
+            overflow: hidden; /* Asla taşma yapma */
+            display: flex; flex-direction: column;
         }
 
-        /* --- ANIMATIONS --- */
-        @keyframes scanline {
-            0% { transform: translateY(-100vh); opacity: 0; }
-            50% { opacity: 0.1; }
-            100% { transform: translateY(100vh); opacity: 0; }
-        }
-        
-        @keyframes pulse-logo {
-            0%, 100% { text-shadow: 0 0 10px var(--neon-blue), 0 0 20px var(--neon-blue); }
-            50% { text-shadow: 0 0 20px var(--neon-blue), 0 0 40px var(--neon-pink); }
+        /* --- LAYOUT GRID (Responsive Fix) --- */
+        .app-container {
+            display: grid;
+            grid-template-rows: 60px 1fr 140px; /* Header, Stage, Footer */
+            height: 100%; width: 100%;
         }
 
-        @keyframes spin-vinyl { 100% { transform: rotate(360deg); } }
-
-        @keyframes equalizer-bar {
-            0% { height: 10%; }
-            50% { height: 90%; }
-            100% { height: 10%; }
-        }
-
-        /* --- LAYOUT COMPONENTS --- */
-        
-        /* OVERLAY (Start Screen) */
-        #boot-sequence {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #000;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 1s var(--ease-out-expo);
-        }
-
-        .boot-logo {
-            font-family: 'Syncopate', sans-serif;
-            font-size: 4vw;
-            font-weight: 700;
-            letter-spacing: 10px;
-            color: transparent;
-            -webkit-text-stroke: 1px rgba(255,255,255,0.8);
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .boot-logo::after {
-            content: "NIGHT SHADE AI";
-            position: absolute; left: 0; top: 0;
-            color: var(--neon-blue);
-            opacity: 0;
-            animation: glitch 2s infinite;
-        }
-
-        .start-btn {
-            padding: 15px 40px;
-            font-family: 'Rajdhani', sans-serif;
-            font-size: 24px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            background: transparent;
-            color: var(--neon-blue);
-            border: 2px solid var(--neon-blue);
-            cursor: pointer;
-            box-shadow: 0 0 15px var(--neon-blue);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .start-btn:hover {
-            background: var(--neon-blue);
-            color: #000;
-            box-shadow: 0 0 40px var(--neon-blue);
-        }
-
-        /* HEADER */
-        .top-deck {
-            height: 60px;
-            background: rgba(0,0,0,0.8);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 30px;
+        /* --- HEADER --- */
+        header {
+            background: var(--glass);
             backdrop-filter: blur(10px);
+            border-bottom: var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0 20px;
             z-index: 100;
         }
 
-        .system-status {
-            display: flex; gap: 20px; font-size: 14px; color: #888;
-        }
-        
-        .status-item { display: flex; align-items: center; gap: 8px; }
-        .indicator { width: 8px; height: 8px; border-radius: 50%; background: #333; box-shadow: 0 0 5px #333; }
-        .indicator.on { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
-        .indicator.rec { background: var(--neon-red); animation: blink 1s infinite; }
+        .brand { font-family: 'Share Tech Mono'; font-size: 24px; letter-spacing: 2px; color: var(--primary); text-shadow: var(--shadow-glow); }
+        .brand span { color: #fff; font-weight: 100; opacity: 0.5; font-size: 14px; }
 
-        /* MAIN STAGE */
-        .stage-container {
-            flex: 1;
+        .ai-stats {
+            display: flex; gap: 20px; font-size: 12px; color: #888; font-family: 'Share Tech Mono';
+        }
+        .stat-box b { color: var(--success); }
+
+        /* --- MAIN STAGE (Center) --- */
+        .stage {
             display: flex;
             justify-content: center;
-            align-items: center;
-            gap: 2vw;
-            padding: 20px;
-            position: relative;
-        }
-        
-        /* DECK PANELS (Left & Right) */
-        .deck-panel {
-            width: 350px;
-            height: 500px;
-            background: linear-gradient(180deg, #1a1a1a 0%, #111 100%);
-            border: 1px solid #333;
-            border-radius: 12px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            position: relative;
-            transition: transform 0.3s var(--ease-out-expo), box-shadow 0.3s;
-        }
-        
-        .deck-panel.active-deck {
-            border-color: var(--neon-blue);
-            box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
-            transform: scale(1.02);
-            z-index: 10;
-        }
-
-        .deck-header {
-            display: flex; justify-content: space-between; margin-bottom: 20px;
-            font-size: 24px; font-weight: 700; color: #444;
-        }
-        .deck-panel.active-deck .deck-header { color: var(--neon-blue); text-shadow: 0 0 10px var(--neon-blue); }
-
-        /* TURNTABLE COMPONENT */
-        .platter-container {
-            width: 260px; height: 260px;
-            margin: 0 auto;
-            position: relative;
-            display: flex; justify-content: center; align-items: center;
-        }
-        
-        .platter-ring {
-            position: absolute; width: 100%; height: 100%;
-            border-radius: 50%;
-            border: 2px dashed #333;
-            animation: spin-vinyl 8s linear infinite reverse;
-            opacity: 0.3;
-        }
-        
-        .vinyl-disc {
-            width: 240px; height: 240px;
-            background: repeating-radial-gradient(#111, #111 2px, #181818 3px, #181818 4px);
-            border-radius: 50%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            display: flex; justify-content: center; align-items: center;
-            position: relative;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .playing .vinyl-disc { animation: spin-vinyl 1.8s linear infinite; }
-        .paused .vinyl-disc { animation-play-state: paused; }
-
-        .vinyl-label {
-            width: 90px; height: 90px;
-            background: radial-gradient(circle at 30% 30%, #444, #222);
-            border-radius: 50%;
-            border: 4px solid #000;
-        }
-        .deck-panel.active-deck .vinyl-label { background: var(--neon-blue); box-shadow: 0 0 20px var(--neon-blue); }
-        .deck-b .vinyl-label { background: var(--neon-pink) !important; box-shadow: 0 0 20px var(--neon-pink) !important; }
-
-        /* TRACK INFO DISPLAY */
-        .lcd-display {
-            background: #080808;
-            margin-top: 20px;
+            align-items: stretch;
             padding: 10px;
-            border-radius: 4px;
+            gap: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* DECK STYLING */
+        .deck {
+            flex: 1;
+            background: linear-gradient(145deg, #15181e, #0a0c0f);
+            border-radius: 10px;
+            border: var(--border);
+            display: flex; flex-direction: column;
+            padding: 15px;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            min-width: 0; /* Flexbox shrink fix */
+        }
+
+        .deck.active {
+            border-color: var(--primary);
+            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05);
+        }
+
+        .deck-info {
+            display: flex; justify-content: space-between; margin-bottom: 10px;
+            font-family: 'Share Tech Mono'; color: #555;
+        }
+        .deck.active .deck-info { color: var(--primary); }
+
+        /* RESPONSIVE TURNTABLE */
+        .turntable-wrapper {
+            flex: 1;
+            display: flex; justify-content: center; align-items: center;
+            position: relative;
+            min-height: 0; /* Important for flex scaling */
+        }
+
+        .vinyl {
+            aspect-ratio: 1/1;
+            height: 80%; /* Container'a göre ölçeklenir */
+            max-height: 300px;
+            border-radius: 50%;
+            background: repeating-radial-gradient(#111, #111 5px, #1a1a1a 6px);
+            border: 4px solid #222;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            display: flex; justify-content: center; align-items: center;
+            animation: spin 0s linear infinite; /* JS ile kontrol edilir */
+        }
+        
+        .vinyl-label {
+            width: 35%; height: 35%;
+            background: var(--secondary);
+            border-radius: 50%;
+            border: 2px solid #fff;
+            opacity: 0.8;
+        }
+
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* TRACK DISPLAY */
+        .lcd-screen {
+            background: #000;
             border: 1px solid #333;
-            font-family: 'Courier New', monospace;
-            color: var(--neon-blue);
-            text-shadow: 0 0 5px var(--neon-blue);
-            height: 80px;
-            display: flex; flex-direction: column; justify-content: space-between;
+            padding: 8px;
+            font-family: 'Share Tech Mono';
+            color: var(--primary);
+            margin-top: 10px;
+            border-radius: 4px;
+        }
+        .track-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
+        .track-time { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; color: #666; }
+        .progress-bar { height: 3px; background: #222; margin-top: 5px; width: 100%; }
+        .progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s linear; }
+
+        /* MIXER (Center Column) */
+        .mixer {
+            width: 220px;
+            background: #0e1014;
+            border: var(--border);
+            border-radius: 10px;
+            display: flex; flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            min-width: 200px;
+        }
+
+        /* AI BRAIN VISUALIZATION */
+        .ai-core-display {
+            flex: 1;
+            background: #000;
+            border: 1px solid rgba(0, 242, 255, 0.3);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        
+        .hologram-canvas {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            opacity: 0.6;
+        }
+
+        .ai-status-msg {
+            z-index: 10; font-size: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 2px 6px;
+            border-radius: 4px; letter-spacing: 1px;
+        }
+
+        .confidence-meter {
+            width: 80%; height: 2px; background: #333; margin-top: 5px; z-index: 10;
+        }
+        .confidence-val { height: 100%; background: var(--success); width: 0%; transition: width 0.5s; }
+
+        /* CONTROLS */
+        .control-group { text-align: center; }
+        
+        .slider-container {
+            width: 100%; padding: 10px 0;
+        }
+        
+        input[type=range] {
+            width: 100%; -webkit-appearance: none; background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 30px; width: 15px;
+            background: #ccc; border-radius: 2px; cursor: pointer; margin-top: -13px;
+            box-shadow: 0 0 10px #fff;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%; height: 4px; background: #333; border-radius: 2px;
+        }
+
+        .btn-ai-toggle {
+            background: rgba(0, 242, 255, 0.1);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            width: 100%; padding: 8px;
+            font-family: 'Exo 2'; font-weight: bold; font-size: 12px;
+            cursor: pointer; border-radius: 4px;
+            transition: 0.3s;
+        }
+        .btn-ai-toggle.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+
+        /* --- FOOTER (Library) --- */
+        footer {
+            background: #080a0d;
+            border-top: var(--border);
+            display: flex;
+            padding: 0;
             overflow: hidden;
         }
-        
-        .track-title-scroll {
-            white-space: nowrap; font-size: 14px; font-weight: bold;
-        }
-        
-        .track-time-bar {
-            width: 100%; height: 4px; background: #222; margin-top: 5px; position: relative;
-        }
-        .track-progress {
-            height: 100%; width: 0%; background: var(--neon-blue);
-            box-shadow: 0 0 10px var(--neon-blue); transition: width 0.5s linear;
-        }
 
-        /* EFFECT KNOBS (Visual Only) */
-        .fx-rack {
-            display: flex; justify-content: space-between; margin-top: 20px; padding: 0 10px;
-        }
-        .knob-box { text-align: center; }
-        .knob {
-            width: 40px; height: 40px; border-radius: 50%;
-            background: radial-gradient(circle, #333 30%, #111 100%);
-            border: 1px solid #444; position: relative;
-            margin: 0 auto 5px; transition: transform 0.1s;
-        }
-        .knob::after {
-            content: ''; position: absolute; top: 5px; left: 50%;
-            width: 2px; height: 10px; background: #fff; transform: translateX(-50%);
-        }
-        .knob-label { font-size: 10px; color: #666; }
-
-        /* MIXER SECTION (Center) */
-        .mixer-panel {
-            width: 200px;
-            height: 520px;
-            background: #151515;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex; flex-direction: column; align-items: center;
-            gap: 20px;
-            z-index: 20;
-        }
-
-        /* AUTOPILOT TOGGLE */
-        .ai-brain {
-            width: 100%;
-            padding: 15px;
-            background: rgba(0, 243, 255, 0.05);
-            border: 1px solid rgba(0, 243, 255, 0.2);
-            border-radius: 8px;
-            text-align: center;
+        .library-panel {
+            flex: 1; display: flex; flex-direction: column;
         }
         
-        .ai-title { font-size: 12px; color: var(--neon-blue); margin-bottom: 8px; letter-spacing: 2px; }
-        
-        .toggle-switch {
-            position: relative; display: inline-block; width: 60px; height: 30px;
-        }
-        .toggle-input { opacity: 0; width: 0; height: 0; }
-        .toggle-slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #333; transition: .4s; border-radius: 34px; border: 1px solid #555;
-        }
-        .toggle-slider:before {
-            position: absolute; content: ""; height: 22px; width: 22px; left: 4px; bottom: 3px;
-            background-color: #888; transition: .4s; border-radius: 50%;
-        }
-        .toggle-input:checked + .toggle-slider { background-color: rgba(0, 243, 255, 0.2); border-color: var(--neon-blue); }
-        .toggle-input:checked + .toggle-slider:before { transform: translateX(28px); background-color: var(--neon-blue); box-shadow: 0 0 10px var(--neon-blue); }
-
-        /* VU METERS */
-        .vu-container {
-            display: flex; gap: 15px; height: 200px;
-        }
-        .vu-meter {
-            width: 15px; height: 100%; background: #111; border-radius: 4px; overflow: hidden;
-            display: flex; flex-direction: column-reverse; padding: 2px; gap: 1px;
-        }
-        .vu-segment {
-            width: 100%; height: 5%; background: #222; transition: background 0.05s;
-        }
-        .vu-segment.lit { background: var(--neon-green); box-shadow: 0 0 5px var(--neon-green); }
-        .vu-segment.peak { background: var(--neon-red); }
-
-        /* CROSSFADER */
-        .fader-group { width: 100%; text-align: center; margin-top: auto; }
-        .fader-track {
-            width: 100%; height: 10px; background: #000; border-radius: 5px; position: relative; border: 1px solid #333;
-        }
-        .fader-handle {
-            width: 40px; height: 30px; background: linear-gradient(180deg, #666, #333);
-            position: absolute; top: 50%; left: 0%; transform: translate(-50%, -50%);
-            border-radius: 4px; border: 1px solid #888; cursor: grab;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            transition: left 0.1s linear; /* Smooth auto move */
-        }
-        .fader-handle::after { content: ''; position: absolute; top: 5px; left: 18px; width: 4px; height: 20px; background: #000; }
-
-        /* PLAYLIST DRAWER */
-        .bottom-panel {
-            height: 180px;
-            background: #0a0a0a;
-            border-top: 1px solid #333;
-            display: flex;
+        .input-bar {
+            padding: 10px; display: flex; gap: 10px; background: #0f1216; border-bottom: 1px solid #222;
         }
         
-        .search-area {
-            width: 300px; padding: 20px; border-right: 1px solid #333;
-            display: flex; flex-direction: column; gap: 10px;
+        input[type="text"] {
+            flex: 1; background: #1a1d24; border: 1px solid #333; color: #fff; padding: 8px;
+            font-family: 'Share Tech Mono';
         }
         
-        .search-input {
-            background: #1a1a1a; border: 1px solid #444; color: white; padding: 12px;
-            font-family: 'Rajdhani'; font-size: 16px; width: 100%;
-        }
-        .add-btn {
-            background: #333; color: var(--neon-blue); border: 1px solid var(--neon-blue);
-            padding: 10px; cursor: pointer; font-weight: bold; transition: 0.2s;
-        }
-        .add-btn:hover { background: var(--neon-blue); color: black; }
+        .btn-add { background: #333; color: #fff; border: none; padding: 0 20px; cursor: pointer; font-weight: bold; }
+        .btn-add:hover { background: #fff; color: #000; }
 
-        .queue-area {
-            flex: 1; padding: 20px; overflow-x: auto; display: flex; gap: 15px;
+        .queue-list {
+            flex: 1; overflow-y: hidden; overflow-x: auto;
+            display: flex; gap: 10px; padding: 15px;
+            align-items: center;
         }
-        
-        .queue-item {
-            min-width: 150px; height: 100%; background: #151515; border: 1px solid #333;
-            border-radius: 6px; padding: 10px; cursor: pointer; position: relative;
+
+        .track-card {
+            min-width: 160px; height: 90px;
+            background: #15181e; border: 1px solid #333; border-radius: 6px;
+            padding: 10px; cursor: pointer;
             display: flex; flex-direction: column; justify-content: space-between;
-            transition: 0.2s;
+            position: relative; transition: 0.2s;
         }
-        .queue-item:hover { border-color: #666; background: #1a1a1a; }
-        .queue-item.next-up { border-color: var(--neon-green); }
-        .queue-title { font-size: 12px; color: #aaa; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+        .track-card:hover { border-color: #666; background: #1a1d24; }
+        .track-card.suggestion { border-color: var(--secondary); box-shadow: 0 0 10px rgba(112, 0, 255, 0.2); }
+        .suggestion-badge { 
+            position: absolute; top: -8px; right: -8px; background: var(--secondary); 
+            font-size: 9px; padding: 2px 6px; border-radius: 10px; color: #fff;
+        }
+
+        /* OVERLAY START */
+        #start-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 999;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .big-btn {
+            font-size: 24px; padding: 20px 60px;
+            background: transparent; color: var(--primary); border: 2px solid var(--primary);
+            font-family: 'Share Tech Mono'; letter-spacing: 4px; cursor: pointer;
+            margin-top: 30px; transition: 0.3s;
+        }
+        .big-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); }
 
         /* UTILS */
-        .hidden-player { position: absolute; visibility: hidden; pointer-events: none; width: 1px; height: 1px;}
-        .glitch-text { animation: glitch-anim 0.3s infinite; }
+        .hidden { display: none; }
         
-        @keyframes glitch-anim {
-            0% { transform: translate(0); }
-            20% { transform: translate(-2px, 2px); }
-            40% { transform: translate(-2px, -2px); }
-            60% { transform: translate(2px, 2px); }
-            80% { transform: translate(2px, -2px); }
-            100% { transform: translate(0); }
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 900px) {
-            .stage-container { flex-direction: column; transform: scale(0.8); }
-            .mixer-panel { order: 2; height: 200px; width: 100%; flex-direction: row; }
-            .vu-container { display: none; }
+        /* MOBILE TWEAKS */
+        @media (max-width: 768px) {
+            .app-container { grid-template-rows: 50px 1fr 120px; }
+            .stage { flex-direction: column; overflow-y: auto; }
+            .mixer { width: 100%; height: 150px; flex-direction: row; min-height: unset; flex-shrink: 0; }
+            .deck { flex-shrink: 0; min-height: 250px; }
+            .ai-core-display { display: none; } /* Mobilede AI ekranını gizle, yer kazanalım */
+            .vinyl { height: 60%; }
         }
     </style>
 </head>
 <body>
 
-    <div id="boot-sequence">
-        <div class="boot-logo">PHANTOM_OS v3.0</div>
-        <div style="color: #666; margin-bottom: 30px; font-family: monospace;">INITIALIZING AUDIO CORE... <span id="boot-percent">0%</span></div>
-        <button class="start-btn" onclick="initializeSystem()">INITIATE SYSTEM</button>
+    <div id="start-overlay">
+        <h1 style="color:#fff; font-size:40px; margin:0; text-shadow:0 0 20px var(--primary);">PHANTOM DJ</h1>
+        <p style="color:#666; font-family:monospace;">NEURAL NETWORK V4.0 INITIALIZED</p>
+        <button class="big-btn" onclick="SYSTEM.init()">SİSTEMİ BAŞLAT</button>
     </div>
 
-    <div class="top-deck">
-        <div class="system-status">
-            <div class="status-item"><div class="indicator on"></div> SYSTEM READY</div>
-            <div class="status-item"><div class="indicator" id="midi-status"></div> MIDI SYNC</div>
-            <div class="status-item"><div class="indicator rec" id="rec-status"></div> LIVE BROADCAST</div>
-        </div>
-        <div style="font-family: 'Syncopate'; font-weight: 700; color: #fff;">NIGHT SHADE AI</div>
-    </div>
+    <div class="app-container">
+        <header>
+            <div class="brand">NEURAL<span>CORE</span></div>
+            <div class="ai-stats">
+                <div class="stat-box">MEMORY: <b id="mem-count">0</b> PATTERNS</div>
+                <div class="stat-box">XP LEVEL: <b id="xp-level">1</b></div>
+            </div>
+        </header>
 
-    <div class="stage-container">
-        <div class="deck-panel active-deck" id="deck-A">
-            <div class="deck-header">
-                <span>DECK A</span>
-                <span style="font-size: 14px; color: var(--neon-blue);">MASTER</span>
-            </div>
-            <div class="platter-container">
-                <div class="platter-ring"></div>
-                <div class="vinyl-disc">
-                    <div class="vinyl-label"></div>
-                </div>
-            </div>
+        <div class="stage">
             
-            <div class="lcd-display">
-                <div class="track-title-scroll" id="title-A">NO MEDIA LOADED</div>
-                <div>
-                    <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
-                        <span id="time-curr-A">00:00</span>
-                        <span id="time-rem-A">-00:00</span>
+            <div class="deck active" id="deck-A">
+                <div class="deck-info">
+                    <span>DECK A</span>
+                    <span id="status-A">READY</span>
+                </div>
+                <div class="turntable-wrapper">
+                    <div class="vinyl" id="vinyl-A"><div class="vinyl-label"></div></div>
+                </div>
+                <div class="lcd-screen">
+                    <div class="track-name" id="title-A">NO MEDIA</div>
+                    <div class="track-time">
+                        <span id="curr-A">00:00</span>
+                        <span id="rem-A">-00:00</span>
                     </div>
-                    <div class="track-time-bar"><div class="track-progress" id="prog-A"></div></div>
+                    <div class="progress-bar"><div class="progress-fill" id="fill-A"></div></div>
                 </div>
             </div>
 
-            <div class="fx-rack">
-                <div class="knob-box"><div class="knob" id="knob-low-A"></div><span class="knob-label">LOW</span></div>
-                <div class="knob-box"><div class="knob" id="knob-mid-A"></div><span class="knob-label">MID</span></div>
-                <div class="knob-box"><div class="knob" id="knob-hi-A"></div><span class="knob-label">HI</span></div>
-                <div class="knob-box"><div class="knob" id="knob-flt-A"></div><span class="knob-label">FILTER</span></div>
-            </div>
-        </div>
-
-        <div class="mixer-panel">
-            <div class="ai-brain">
-                <div class="ai-title">AUTOPILOT CORE</div>
-                <label class="toggle-switch">
-                    <input type="checkbox" class="toggle-input" id="autopilot-toggle" checked>
-                    <span class="toggle-slider"></span>
-                </label>
-                <div id="ai-status-text" style="font-size: 10px; color: #666; margin-top: 5px;">AI ANALYZING...</div>
-            </div>
-
-            <div class="vu-container">
-                <div class="vu-meter" id="vu-left"></div>
-                <div class="vu-meter" id="vu-right"></div>
-            </div>
-
-            <button onclick="emergencySkip()" style="background: #330000; border: 1px solid #ff0000; color: #ff0000; padding: 10px; width: 100%; border-radius: 4px; cursor: pointer; font-size: 10px;">EMERGENCY SKIP</button>
-
-            <div class="fader-group">
-                <div style="font-size: 10px; color: #666; margin-bottom: 5px;">CROSSFADER (AUTO)</div>
-                <div class="fader-track" id="xfader-track">
-                    <div class="fader-handle" id="xfader-handle" style="left: 0%;"></div>
+            <div class="mixer">
+                <div class="ai-core-display">
+                    <canvas id="brain-canvas" class="hologram-canvas"></canvas>
+                    <div class="ai-status-msg" id="ai-msg">AI STANDBY</div>
+                    <div class="confidence-meter"><div class="confidence-val" id="ai-conf"></div></div>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:10px; margin-top:5px; color:#444;">
-                    <span>A</span><span>B</span>
-                </div>
-            </div>
-        </div>
 
-        <div class="deck-panel deck-b" id="deck-B">
-            <div class="deck-header">
-                <span>DECK B</span>
-                <span style="font-size: 14px; color: var(--neon-pink);">SLAVE</span>
-            </div>
-            <div class="platter-container">
-                <div class="platter-ring"></div>
-                <div class="vinyl-disc">
-                    <div class="vinyl-label"></div>
+                <div class="control-group">
+                    <button class="btn-ai-toggle active" id="btn-autopilot" onclick="AI.toggle()">
+                        AUTOPILOT: ON
+                    </button>
                 </div>
-            </div>
-            
-            <div class="lcd-display">
-                <div class="track-title-scroll" id="title-B">NO MEDIA LOADED</div>
-                <div>
-                    <div style="display:flex; justify-content:space-between; font-size:12px; color:#666;">
-                        <span id="time-curr-B">00:00</span>
-                        <span id="time-rem-B">-00:00</span>
+
+                <div class="control-group" style="margin-top: auto;">
+                    <div style="font-size: 10px; color: #666; margin-bottom: 5px;">CROSSFADER</div>
+                    <div class="slider-container">
+                        <input type="range" min="0" max="100" value="0" id="crossfader" oninput="AUDIO.manualCrossfade(this.value)">
                     </div>
-                    <div class="track-time-bar"><div class="track-progress" id="prog-B" style="background: var(--neon-pink); box-shadow: 0 0 10px var(--neon-pink);"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#444; padding:0 5px;">
+                        <span>A</span><span>B</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="fx-rack">
-                <div class="knob-box"><div class="knob" id="knob-low-B"></div><span class="knob-label">LOW</span></div>
-                <div class="knob-box"><div class="knob" id="knob-mid-B"></div><span class="knob-label">MID</span></div>
-                <div class="knob-box"><div class="knob" id="knob-hi-B"></div><span class="knob-label">HI</span></div>
-                <div class="knob-box"><div class="knob" id="knob-flt-B"></div><span class="knob-label">FILTER</span></div>
+            <div class="deck" id="deck-B">
+                <div class="deck-info">
+                    <span>DECK B</span>
+                    <span id="status-B">WAITING</span>
+                </div>
+                <div class="turntable-wrapper">
+                    <div class="vinyl" id="vinyl-B"><div class="vinyl-label" style="background:var(--primary);"></div></div>
+                </div>
+                <div class="lcd-screen">
+                    <div class="track-name" id="title-B">NO MEDIA</div>
+                    <div class="track-time">
+                        <span id="curr-B">00:00</span>
+                        <span id="rem-B">-00:00</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="fill-B"></div></div>
+                </div>
             </div>
+
         </div>
+
+        <footer>
+            <div class="library-panel">
+                <div class="input-bar">
+                    <input type="text" id="yt-input" placeholder="YouTube Linki Yapıştır...">
+                    <button class="btn-add" onclick="LIBRARY.addFromInput()">EKLE</button>
+                    <button class="btn-add" style="background:#222; color:#888;" onclick="toggleFullScreen()">[ ]</button>
+                </div>
+                <div class="queue-list" id="queue-box">
+                    </div>
+            </div>
+        </footer>
     </div>
 
-    <div class="bottom-panel">
-        <div class="search-area">
-            <div style="font-size:12px; color:#666; margin-bottom:5px;">MANUAL OVERRIDE</div>
-            <input type="text" class="search-input" id="yt-input" placeholder="Paste YouTube Link / ID">
-            <button class="add-btn" onclick="addToQueueFromInput()">LOAD TO QUEUE</button>
-            <div style="font-size: 10px; color: #444; margin-top: 10px;">
-                AI SUGGESTION: "Tech House Mix 2024"
-            </div>
-        </div>
-        <div class="queue-area" id="queue-container">
-            </div>
-    </div>
-
-    <div class="hidden-player" id="player-A"></div>
-    <div class="hidden-player" id="player-B"></div>
+    <div id="player-A" class="hidden"></div>
+    <div id="player-B" class="hidden"></div>
 
     <script>
-        /* =========================================
-           CORE SYSTEM ARCHITECTURE (v3.0)
-           ========================================= */
+        /* --- GLOBAL HELPERS --- */
+        const $ = (id) => document.getElementById(id);
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>{});
+            else if (document.exitFullscreen) document.exitFullscreen();
+        }
 
-        const SYSTEM = {
-            state: {
-                activeDeck: 'A', // 'A' or 'B'
-                isPlaying: false,
-                isTransitioning: false,
-                autoPilot: true,
-                crossfaderPos: 0, // 0 = A, 100 = B
-                volumeA: 100,
-                volumeB: 0
+        /* --- 1. NEURAL CORE (PERSISTENT MEMORY) --- */
+        const MEMORY = {
+            data: {
+                patterns: {}, // { "SongID_A": { "SongID_B": count } }
+                xp: 0,
+                totalMixes: 0
             },
-            queue: [
-                { id: '1rP33Q6aT5U', title: 'Ibiza Summer House Mix 2025', duration: 'Unknown' },
-                { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio', duration: 'Live' },
-                { id: '5r3B7yL2sC0', title: 'Deep Focus House', duration: 'Unknown' },
-                { id: 'N8c281j0A14', title: 'Tech House Bomb', duration: 'Unknown' },
-                { id: 'C9r4s1g5',    title: 'Festival Mainstage IDs', duration: 'Unknown' } // Fake ID for error testing
-            ],
-            players: { A: null, B: null },
-            intervals: {
-                watchdog: null,
-                vu: null,
-                knobs: null
+            
+            load: function() {
+                const stored = localStorage.getItem('DJ_NEURAL_V4');
+                if (stored) this.data = JSON.parse(stored);
+                this.updateUI();
+            },
+
+            save: function() {
+                localStorage.setItem('DJ_NEURAL_V4', JSON.stringify(this.data));
+                this.updateUI();
+            },
+
+            learnConnection: function(fromId, toId) {
+                if(!fromId || !toId || fromId === toId) return;
+                
+                if(!this.data.patterns[fromId]) this.data.patterns[fromId] = {};
+                if(!this.data.patterns[fromId][toId]) this.data.patterns[fromId][toId] = 0;
+                
+                this.data.patterns[fromId][toId]++;
+                this.data.totalMixes++;
+                this.data.xp += 10; // XP Gain
+                
+                this.save();
+                console.log(`[NEURAL] Learned connection: ${fromId} -> ${toId}`);
+            },
+
+            getBestNextTrack: function(currentId, availableQueue) {
+                // Mevcut şarkıdan sonra en çok çalınan şarkıyı bul
+                const knowledge = this.data.patterns[currentId];
+                if (!knowledge) return null;
+
+                // Knowledge içindeki en yüksek puanlı ID'yi bul
+                let bestId = null;
+                let maxScore = -1;
+                
+                for (const [nextId, score] of Object.entries(knowledge)) {
+                    if (score > maxScore) {
+                        maxScore = score;
+                        bestId = nextId;
+                    }
+                }
+
+                // Bu ID kuyrukta var mı?
+                return availableQueue.find(track => track.id === bestId);
+            },
+
+            updateUI: function() {
+                const patternCount = Object.keys(this.data.patterns).length;
+                const level = Math.floor(this.data.xp / 100) + 1;
+                $('mem-count').innerText = patternCount;
+                $('xp-level').innerText = level;
             }
         };
 
-        // --- YOUTUBE API SETUP ---
+        /* --- 2. AI CONTROLLER --- */
+        const AI = {
+            active: true,
+            confidence: 0,
+            lastActionTime: 0,
+            
+            toggle: function() {
+                this.active = !this.active;
+                $('btn-autopilot').className = this.active ? 'btn-ai-toggle active' : 'btn-ai-toggle';
+                $('btn-autopilot').innerText = this.active ? 'AUTOPILOT: ON' : 'AUTOPILOT: OFF';
+                $('ai-msg').innerText = this.active ? 'AI RESUMED' : 'MANUAL CONTROL';
+            },
+
+            think: function() {
+                if (!this.active) return;
+                
+                const activeDeck = AUDIO.activeDeck;
+                const activePlayer = AUDIO.players[activeDeck];
+                if (!activePlayer || !activePlayer.getDuration) return;
+
+                const duration = activePlayer.getDuration();
+                const current = activePlayer.getCurrentTime();
+                const remaining = duration - current;
+                
+                // Visual Updates
+                this.updateHologram(remaining);
+
+                // LOGIC GATES
+                
+                // 1. Prepare Next Track (30s remaining)
+                if (remaining < 30 && remaining > 25) {
+                    const standby = activeDeck === 'A' ? 'B' : 'A';
+                    if (AUDIO.deckStates[standby] === 'EMPTY') {
+                        $('ai-msg').innerText = "SELECTING NEXT TRACK...";
+                        LIBRARY.loadSmartTrack(standby);
+                    }
+                }
+
+                // 2. Sync & Buffer (15s remaining)
+                if (remaining < 15 && remaining > 10) {
+                    const standby = activeDeck === 'A' ? 'B' : 'A';
+                    if (AUDIO.deckStates[standby] !== 'PLAYING') {
+                        $('ai-msg').innerText = "BEATMATCHING...";
+                        AUDIO.playDeck(standby, 0); // Play silent
+                    }
+                }
+
+                // 3. EXECUTE MIX (Random logic based on 'Confidence')
+                // Basic: If < 10s, mix.
+                if (remaining < 10 && remaining > 0 && !AUDIO.isMixing) {
+                    $('ai-msg').innerText = "EXECUTING TRANSITION";
+                    AUDIO.autoMix(activeDeck === 'A' ? 'B' : 'A');
+                    
+                    // Learn Pattern
+                    const prevTrack = AUDIO.currentTracks[activeDeck];
+                    const nextTrack = AUDIO.currentTracks[activeDeck === 'A' ? 'B' : 'A'];
+                    if(prevTrack && nextTrack) {
+                        MEMORY.learnConnection(prevTrack.id, nextTrack.id);
+                    }
+                }
+            },
+
+            updateHologram: function(remaining) {
+                // Fake confidence calculation based on time
+                if (remaining > 30) this.confidence = 90 + Math.random() * 10;
+                else if (remaining > 10) this.confidence = 70 + Math.random() * 20;
+                else this.confidence = 40 + Math.random() * 50; // Panic mode
+
+                $('ai-conf').style.width = this.confidence + "%";
+                
+                if (AUDIO.isMixing) {
+                    $('ai-conf').style.backgroundColor = "var(--secondary)";
+                    $('ai-msg').innerText = "MIXING IN PROGRESS...";
+                } else {
+                    $('ai-conf').style.backgroundColor = "var(--success)";
+                }
+            }
+        };
+
+        /* --- 3. LIBRARY SYSTEM --- */
+        const LIBRARY = {
+            queue: [
+                { id: 'lTRiuFIWV54', title: 'Ibiza Summer Mix 2024' },
+                { id: '5r3B7yL2sC0', title: 'Deep House Relax' },
+                { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio' },
+                { id: '7nos6lNMulo', title: 'Club Hits 2025' }
+            ],
+
+            init: function() {
+                this.renderQueue();
+            },
+
+            addFromInput: function() {
+                const val = $('yt-input').value;
+                let id = '';
+                if (val.includes('v=')) id = val.split('v=')[1].split('&')[0];
+                else if (val.includes('youtu.be/')) id = val.split('youtu.be/')[1];
+                else id = val; // Try direct ID
+
+                if (id.length > 5) {
+                    this.queue.push({ id: id, title: 'User Track ' + Math.floor(Math.random()*100) });
+                    $('yt-input').value = '';
+                    this.renderQueue();
+                }
+            },
+
+            renderQueue: function() {
+                const container = $('queue-box');
+                container.innerHTML = '';
+                
+                // Get AI Suggestion based on current playing track
+                const currentTrackId = AUDIO.currentTracks[AUDIO.activeDeck]?.id;
+                const smartPick = MEMORY.getBestNextTrack(currentTrackId, this.queue);
+
+                this.queue.forEach((track, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'track-card';
+                    if (smartPick && smartPick.id === track.id) {
+                        div.classList.add('suggestion');
+                        div.innerHTML += `<span class="suggestion-badge">AI PICK</span>`;
+                    }
+                    div.innerHTML += `
+                        <div style="font-size:11px; color:#888;">#${idx+1}</div>
+                        <div style="font-size:12px; font-weight:bold; overflow:hidden;">${track.title}</div>
+                    `;
+                    div.onclick = () => this.forceLoad(track);
+                    container.appendChild(div);
+                });
+            },
+
+            loadSmartTrack: function(deckId) {
+                if (this.queue.length === 0) return;
+                
+                const currentTrackId = AUDIO.currentTracks[AUDIO.activeDeck === 'A' ? 'B' : 'A']?.id; // Other deck
+                let pick = MEMORY.getBestNextTrack(currentTrackId, this.queue);
+                
+                // If no smart pick or same as playing, pick random but not same
+                if (!pick) {
+                    pick = this.queue[Math.floor(Math.random() * this.queue.length)];
+                }
+
+                AUDIO.loadTrack(deckId, pick);
+            },
+
+            forceLoad: function(track) {
+                // Load to the inactive deck
+                const target = AUDIO.activeDeck === 'A' ? 'B' : 'A';
+                AUDIO.loadTrack(target, track);
+            }
+        };
+
+        /* --- 4. AUDIO ENGINE --- */
+        const AUDIO = {
+            players: { A: null, B: null },
+            activeDeck: 'A',
+            isMixing: false,
+            deckStates: { A: 'EMPTY', B: 'EMPTY' }, // EMPTY, LOADED, PLAYING
+            currentTracks: { A: null, B: null },
+            crossfader: 0,
+
+            init: function() {
+                // Players created by YouTube API callback
+            },
+
+            loadTrack: function(deck, track) {
+                if (!this.players[deck]) return;
+                
+                this.currentTracks[deck] = track;
+                this.players[deck].loadVideoById(track.id);
+                this.players[deck].pauseVideo(); // Start paused
+                
+                $(`title-${deck}`).innerText = track.title;
+                $(`status-${deck}`).innerText = "LOADED";
+                this.deckStates[deck] = 'LOADED';
+                
+                // Reset Visuals
+                $(`vinyl-${deck}`).style.animation = "none";
+            },
+
+            playDeck: function(deck, volume = 100) {
+                if (!this.players[deck]) return;
+                this.players[deck].playVideo();
+                this.players[deck].setVolume(volume);
+                this.deckStates[deck] = 'PLAYING';
+                $(`deck-${deck}`).classList.add('active');
+                $(`vinyl-${deck}`).style.animation = "spin 2s linear infinite";
+            },
+
+            stopDeck: function(deck) {
+                 if (!this.players[deck]) return;
+                 // Don't stop completely to avoid buffering if we need it back, just pause
+                 this.players[deck].pauseVideo(); 
+                 this.deckStates[deck] = 'LOADED';
+                 $(`deck-${deck}`).classList.remove('active');
+                 $(`vinyl-${deck}`).style.animation = "none";
+            },
+
+            manualCrossfade: function(val) {
+                // val: 0 (A) to 100 (B)
+                this.isMixing = true; // User intervention
+                this.applyCrossfade(val);
+                
+                if (val == 0) this.activeDeck = 'A';
+                if (val == 100) this.activeDeck = 'B';
+            },
+
+            autoMix: function(targetDeck) {
+                this.isMixing = true;
+                const start = parseInt($('crossfader').value);
+                const end = targetDeck === 'B' ? 100 : 0;
+                const duration = 6000; // 6 seconds mix
+                const steps = 60;
+                
+                let step = 0;
+                const interval = setInterval(() => {
+                    step++;
+                    const progress = step / steps;
+                    const val = start + (end - start) * progress;
+                    
+                    $('crossfader').value = val;
+                    this.applyCrossfade(val);
+
+                    if (step >= steps) {
+                        clearInterval(interval);
+                        this.finishMix(targetDeck);
+                    }
+                }, duration / steps);
+            },
+
+            applyCrossfade: function(val) {
+                // Equal Power Logic
+                const ratio = val / 100;
+                const volA = Math.cos(ratio * 0.5 * Math.PI) * 100;
+                const volB = Math.cos((1 - ratio) * 0.5 * Math.PI) * 100;
+
+                if (this.players.A) this.players.A.setVolume(volA);
+                if (this.players.B) this.players.B.setVolume(volB);
+            },
+
+            finishMix: function(winnerDeck) {
+                this.isMixing = false;
+                this.activeDeck = winnerDeck;
+                const loserDeck = winnerDeck === 'A' ? 'B' : 'A';
+                
+                this.stopDeck(loserDeck);
+                $(`deck-${winnerDeck}`).classList.add('active');
+                $(`status-${winnerDeck}`).innerText = "ON AIR";
+            },
+
+            updateLoop: function() {
+                // Updates timers and progress bars
+                ['A', 'B'].forEach(d => {
+                    const p = this.players[d];
+                    if (p && p.getDuration) {
+                        const dur = p.getDuration();
+                        const curr = p.getCurrentTime();
+                        if (dur > 0) {
+                            $(`fill-${d}`).style.width = ((curr / dur) * 100) + "%";
+                            $(`curr-${d}`).innerText = this.fmtTime(curr);
+                            $(`rem-${d}`).innerText = "-" + this.fmtTime(dur - curr);
+                        }
+                    }
+                });
+            },
+
+            fmtTime: function(s) {
+                const m = Math.floor(s / 60);
+                const sec = Math.floor(s % 60);
+                return `${m}:${sec<10?'0'+sec:sec}`;
+            }
+        };
+
+        /* --- 5. INITIALIZATION SEQUENCE --- */
+        const SYSTEM = {
+            init: function() {
+                $('start-overlay').style.display = 'none';
+                MEMORY.load();
+                LIBRARY.init();
+                
+                // Force Audio Context unlock
+                // (Browser policy requires user interaction first)
+                
+                // Load First Track
+                LIBRARY.loadSmartTrack('A');
+                setTimeout(() => AUDIO.playDeck('A'), 1000);
+                
+                // Start Brain Loop
+                setInterval(() => AI.think(), 1000);
+                setInterval(() => AUDIO.updateLoop(), 500);
+                
+                // Start Hologram Visualizer
+                this.startHologram();
+            },
+
+            startHologram: function() {
+                const canvas = $('brain-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                // Resize handling
+                const resize = () => {
+                    canvas.width = canvas.parentElement.offsetWidth;
+                    canvas.height = canvas.parentElement.offsetHeight;
+                };
+                window.onresize = resize;
+                resize();
+
+                // Animation Loop
+                const draw = () => {
+                    ctx.fillStyle = 'rgba(0,0,0,0.1)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    
+                    ctx.strokeStyle = AUDIO.isMixing ? '#7000ff' : '#00f2ff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    
+                    const centerY = canvas.height / 2;
+                    const amplitude = AUDIO.isMixing ? 50 : 20;
+                    
+                    for (let x = 0; x < canvas.width; x++) {
+                        // Simulated waveform based on random + time
+                        const y = centerY + Math.sin(x * 0.05 + Date.now() * 0.01) * amplitude * Math.random();
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.stroke();
+                    requestAnimationFrame(draw);
+                };
+                draw();
+            }
+        };
+
+        /* --- YOUTUBE IFRAME API --- */
         var tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         var firstScriptTag = document.getElementsByTagName('script')[0];
         firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
         function onYouTubeIframeAPIReady() {
-            // Player A Initialization
-            SYSTEM.players.A = new YT.Player('player-A', {
-                height: '100', width: '100', videoId: '',
-                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
-                events: { 'onStateChange': (e) => onPlayerStateChange('A', e), 'onError': (e) => onPlayerError('A', e) }
-            });
-
-            // Player B Initialization
-            SYSTEM.players.B = new YT.Player('player-B', {
-                height: '100', width: '100', videoId: '',
-                playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
-                events: { 'onStateChange': (e) => onPlayerStateChange('B', e), 'onError': (e) => onPlayerError('B', e) }
-            });
-
-            // Simulate Boot Progress
-            let p = 0;
-            const bootText = document.getElementById('boot-percent');
-            const int = setInterval(() => {
-                p += Math.floor(Math.random() * 5) + 1;
-                if(p > 100) { p = 100; clearInterval(int); }
-                bootText.innerText = p + "%";
-            }, 50);
-        }
-
-        /* =========================================
-           INITIALIZATION & UI LOGIC
-           ========================================= */
-        
-        function initializeSystem() {
-            document.getElementById('boot-sequence').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('boot-sequence').style.display = 'none';
-                startEngine();
-            }, 1000);
-        }
-
-        function startEngine() {
-            renderQueue();
-            loadNextTrackToDeck('A'); // Load first track
-            
-            // Start Watchdog (Auto Pilot Brain)
-            SYSTEM.intervals.watchdog = setInterval(aiBrainLoop, 1000);
-            
-            // Start Visual FX
-            SYSTEM.intervals.vu = setInterval(simulateVUMeters, 50);
-            SYSTEM.intervals.knobs = setInterval(animateKnobs, 2000); // Random knob tweaks
-            
-            // Play First Track immediately (Autoplay policy hack via Start button)
-            setTimeout(() => {
-                 if(SYSTEM.players.A.playVideo) {
-                     SYSTEM.players.A.playVideo();
-                     SYSTEM.state.isPlaying = true;
-                     updateDeckVisuals('A', true);
-                 }
-            }, 1500);
-        }
-
-        /* =========================================
-           PLAYER LOGIC
-           ========================================= */
-
-        function loadNextTrackToDeck(deckId) {
-            if(SYSTEM.queue.length === 0) {
-                // Emergency track if queue empty
-                SYSTEM.queue.push({id: 'lTRiuFIWV54', title: 'EMERGENCY BACKUP MIX'});
-            }
-
-            const track = SYSTEM.queue.shift(); // Get first
-            renderQueue(); // Update UI
-
-            // UI Update
-            document.getElementById(`title-${deckId}`).innerText = track.title.toUpperCase();
-            
-            // Player Load
-            if(SYSTEM.players[deckId] && SYSTEM.players[deckId].loadVideoById) {
-                SYSTEM.players[deckId].loadVideoById(track.id);
-                // If loading to inactive deck, ensure muted/stopped initially or paused at 0
-                // We'll handle volume in crossfader logic
-                if(deckId !== SYSTEM.state.activeDeck) {
-                    SYSTEM.players[deckId].setVolume(0);
-                    // We let it play for buffering then pause? No, YT autoplay is tricky.
-                    // Let it play with vol 0, pause after 1 sec to buffer.
-                    // For simplicity in automation: Let it play muted.
-                } else {
-                    SYSTEM.players[deckId].setVolume(100);
-                }
-            }
-        }
-
-        function onPlayerStateChange(deckId, event) {
-            // YT.PlayerState: -1 (unstarted), 0 (ended), 1 (playing), 2 (paused), 3 (buffering), 5 (video cued).
-            const container = document.getElementById(`deck-${deckId}`);
-            
-            if (event.data === YT.PlayerState.PLAYING) {
-                container.classList.add('playing');
-                // If this is the standby deck starting, keep it muted
-                if(deckId !== SYSTEM.state.activeDeck) {
-                     SYSTEM.players[deckId].setVolume(0);
-                }
-            } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
-                container.classList.remove('playing');
-            }
-        }
-
-        function onPlayerError(deckId, event) {
-            console.warn(`Deck ${deckId} Error:`, event.data);
-            const titleEl = document.getElementById(`title-${deckId}`);
-            titleEl.innerText = "ERR: MEDIA LOAD FAIL - SKIPPING";
-            titleEl.classList.add('glitch-text');
-            
-            // Immediate action: Try next song
-            setTimeout(() => {
-                titleEl.classList.remove('glitch-text');
-                loadNextTrackToDeck(deckId);
-                // If this was the active deck, we have a silence problem. 
-                // For now, load new track and play.
-                SYSTEM.players[deckId].playVideo();
-            }, 2000);
-        }
-
-        /* =========================================
-           AI BRAIN (AUTOPILOT)
-           ========================================= */
-        
-        function aiBrainLoop() {
-            if(!document.getElementById('autopilot-toggle').checked) {
-                document.getElementById('ai-status-text').innerText = "MANUAL CONTROL";
-                return;
-            }
-
-            const activeId = SYSTEM.state.activeDeck;
-            const standbyId = activeId === 'A' ? 'B' : 'A';
-            const player = SYSTEM.players[activeId];
-            const standbyPlayer = SYSTEM.players[standbyId];
-
-            if(!player || !player.getDuration) return;
-
-            try {
-                const duration = player.getDuration();
-                const currentTime = player.getCurrentTime();
-                const remaining = duration - currentTime;
-
-                // Update Timers
-                updateTimeDisplay(activeId, currentTime, duration);
-                
-                // Status Update
-                const statusEl = document.getElementById('ai-status-text');
-
-                // --- LOGIC GATES ---
-
-                // 1. PRE-LOAD NEXT TRACK (30s before end)
-                if (remaining < 40 && remaining > 30) {
-                    // Check if standby is ready. If state is unstarted (-1) or cued (5) or ended (0)
-                    const sState = standbyPlayer.getPlayerState();
-                    if(sState === -1 || sState === 0 || sState === 5 || sState === 2) {
-                         statusEl.innerText = "PREPARING NEXT TRACK...";
-                         // Ensure track loaded
-                         // (Usually loaded by transition end, but double check)
-                         if(document.getElementById(`title-${standbyId}`).innerText === "NO MEDIA LOADED") {
-                             loadNextTrackToDeck(standbyId);
-                         }
-                         // Start playing muted to buffer
-                         standbyPlayer.playVideo();
-                         standbyPlayer.setVolume(0);
-                    }
-                }
-
-                // 2. TRIGGER TRANSITION (15s before end)
-                if (remaining < 15 && remaining > 0 && !SYSTEM.state.isTransitioning) {
-                    statusEl.innerText = "INITIATING TRANSITION...";
-                    performAutoMix(standbyId); // Move TO standby
-                }
-                
-                // 3. IDLE STATE
-                if(remaining > 40) {
-                    statusEl.innerText = "MONITORING AUDIO LEVELS...";
-                }
-
-            } catch(e) {
-                // Player might not be ready
-            }
-        }
-
-        function performAutoMix(targetDeck) {
-            SYSTEM.state.isTransitioning = true;
-            const duration = 8000; // 8 seconds mix
-            const steps = 50;
-            const intervalTime = duration / steps;
-            let currentStep = 0;
-            
-            // Determine Direction
-            // If target is B, we go 0 -> 100. If target is A, we go 100 -> 0.
-            const startVal = SYSTEM.state.crossfaderPos;
-            const endVal = targetDeck === 'B' ? 100 : 0;
-            
-            // Visuals
-            document.getElementById(`deck-${targetDeck}`).classList.add('playing');
-            
-            const mixInt = setInterval(() => {
-                currentStep++;
-                
-                // Linear interpolation
-                let newVal = startVal + ((endVal - startVal) * (currentStep / steps));
-                SYSTEM.state.crossfaderPos = newVal;
-                
-                updateCrossfaderVisuals(newVal);
-                updateVolumeLevels(newVal);
-
-                if(currentStep >= steps) {
-                    clearInterval(mixInt);
-                    SYSTEM.state.isTransitioning = false;
-                    SYSTEM.state.activeDeck = targetDeck;
-                    
-                    // Cleanup Old Deck
-                    const oldDeck = targetDeck === 'A' ? 'B' : 'A';
-                    SYSTEM.players[oldDeck].pauseVideo();
-                    document.getElementById(`deck-${oldDeck}`).classList.remove('active-deck');
-                    document.getElementById(`deck-${targetDeck}`).classList.add('active-deck');
-                    
-                    // Load new track to the now empty deck for next time
-                    setTimeout(() => {
-                        loadNextTrackToDeck(oldDeck);
-                    }, 2000);
-                }
-            }, intervalTime);
-        }
-
-        function updateVolumeLevels(xVal) {
-            // Equal Power Crossfade Curve approximation
-            // xVal is 0 to 100
-            // Deck A: cos(x * PI / 2)
-            // Deck B: sin(x * PI / 2)
-            
-            const ratio = xVal / 100;
-            const volA = Math.cos(ratio * 0.5 * Math.PI) * 100;
-            const volB = Math.cos((1 - ratio) * 0.5 * Math.PI) * 100;
-            
-            if(SYSTEM.players.A) SYSTEM.players.A.setVolume(volA);
-            if(SYSTEM.players.B) SYSTEM.players.B.setVolume(volB);
-        }
-
-        function emergencySkip() {
-            const next = SYSTEM.state.activeDeck === 'A' ? 'B' : 'A';
-            // Force load if empty
-            if(document.getElementById(`title-${next}`).innerText === "NO MEDIA LOADED") {
-                loadNextTrackToDeck(next);
-            }
-            // Ensure playing
-            SYSTEM.players[next].playVideo();
-            SYSTEM.players[next].setVolume(0);
-            
-            performAutoMix(next);
-        }
-
-        /* =========================================
-           VISUALS & UI UPDATES
-           ========================================= */
-
-        function updateCrossfaderVisuals(val) {
-            // Val 0 to 100
-            const handle = document.getElementById('xfader-handle');
-            // Map 0-100 to CSS Left % (Handle width needs offset, approx 0% to 100%)
-            handle.style.left = val + "%";
-        }
-
-        function updateDeckVisuals(deckId, active) {
-            const el = document.getElementById(`deck-${deckId}`);
-            if(active) el.classList.add('active-deck');
-            else el.classList.remove('active-deck');
-        }
-
-        function updateTimeDisplay(deckId, current, total) {
-            const format = (s) => {
-                if(isNaN(s)) return "00:00";
-                const m = Math.floor(s / 60);
-                const sec = Math.floor(s % 60);
-                return `${m < 10 ? '0'+m : m}:${sec < 10 ? '0'+sec : sec}`;
-            }
-            document.getElementById(`time-curr-${deckId}`).innerText = format(current);
-            document.getElementById(`time-rem-${deckId}`).innerText = "-" + format(total - current);
-            
-            const percent = (current / total) * 100;
-            document.getElementById(`prog-${deckId}`).style.width = percent + "%";
-        }
-
-        // FAKE VU METER
-        function simulateVUMeters() {
-            const left = document.getElementById('vu-left');
-            const right = document.getElementById('vu-right');
-            
-            if(!SYSTEM.state.isPlaying) return;
-
-            // Generate fake audio levels based on active deck volume logic
-            // Add some randomness for "beat" feeling
-            
-            const drawMeter = (el) => {
-                el.innerHTML = '';
-                const baseLevel = Math.random() * 0.8 + 0.2; // 20% to 100%
-                // 20 segments
-                const segCount = 20;
-                const litCount = Math.floor(baseLevel * segCount);
-                
-                for(let i=0; i<segCount; i++) {
-                    const div = document.createElement('div');
-                    div.className = 'vu-segment';
-                    if(i < litCount) div.classList.add('lit');
-                    if(i > 17 && i < litCount) div.classList.add('peak');
-                    el.appendChild(div);
-                }
-            };
-            
-            drawMeter(left);
-            drawMeter(right);
-        }
-
-        // FAKE KNOB ANIMATION (The "Ghost DJ")
-        function animateKnobs() {
-            if(!SYSTEM.state.isPlaying || !SYSTEM.state.autoPilot) return;
-            
-            // Randomly tweak a filter knob slightly
-            const active = SYSTEM.state.activeDeck;
-            const knobs = ['low', 'mid', 'hi', 'flt'];
-            const knobType = knobs[Math.floor(Math.random() * knobs.length)];
-            const el = document.getElementById(`knob-${knobType}-${active}`);
-            
-            // Random rotation between -30deg and +30deg
-            const rot = (Math.random() * 60) - 30;
-            
-            el.style.transform = `rotate(${rot}deg)`;
-            
-            // Return to 0 after a bit
-            setTimeout(() => {
-                el.style.transform = `rotate(0deg)`;
-            }, 500 + Math.random() * 1000);
-        }
-
-        /* =========================================
-           QUEUE MANAGEMENT
-           ========================================= */
-        
-        function renderQueue() {
-            const container = document.getElementById('queue-container');
-            container.innerHTML = '';
-            
-            SYSTEM.queue.forEach((track, idx) => {
-                const div = document.createElement('div');
-                div.className = 'queue-item';
-                if(idx === 0) div.classList.add('next-up');
-                div.innerHTML = `
-                    <div style="font-size:10px; color:var(--neon-blue); font-weight:bold;">#${idx+1}</div>
-                    <div class="queue-title">${track.title}</div>
-                    <div style="font-size:9px; color:#666; margin-top:5px;">YOUTUBE AUDIO</div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function addToQueueFromInput() {
-            const input = document.getElementById('yt-input');
-            const val = input.value.trim();
-            if(!val) return;
-            
-            let id = val;
-            // Extract ID
-            if(val.includes('v=')) id = val.split('v=')[1].split('&')[0];
-            else if(val.includes('youtu.be/')) id = val.split('youtu.be/')[1];
-            
-            if(id.length > 5) {
-                SYSTEM.queue.push({
-                    id: id,
-                    title: 'USER ADDED TRACK ' + Math.floor(Math.random()*1000),
-                    duration: 'Unknown'
-                });
-                renderQueue();
-                input.value = '';
-                
-                // Visual Feedback
-                const btn = document.querySelector('.add-btn');
-                const orig = btn.innerText;
-                btn.innerText = "ADDED!";
-                btn.style.background = "var(--neon-green)";
-                setTimeout(() => {
-                    btn.innerText = orig;
-                    btn.style.background = "#333";
-                }, 1000);
-            }
+            AUDIO.players.A = new YT.Player('player-A', { height: '1', width: '1', videoId: '' });
+            AUDIO.players.B = new YT.Player('player-B', { height: '1', width: '1', videoId: '' });
         }
 
     </script>
