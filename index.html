@@ -213,7 +213,8 @@
             Kısa, öz ve net cevaplar ver. Asla kabalık yapma.`,
 
             async process(text) {
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
+                // HATA DÜZELTME: Model ismini 'gemini-1.5-flash-latest' yaptık
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${this.apiKey}`;
                 
                 // Konuşma geçmişi (Context)
                 let context = this.systemPrompt + "\n";
@@ -230,8 +231,7 @@
                     const data = await response.json();
 
                     if (data.error) {
-                        // Hata detayını döndür
-                        return { error: true, msg: `API Hatası: ${data.error.message} (Kod: ${data.error.code})` };
+                        return { error: true, msg: `API Hatası: ${data.error.message}` };
                     }
 
                     if (data.candidates && data.candidates.length > 0) {
@@ -240,7 +240,7 @@
                         AppState.history.push({role:'bot', text: reply});
                         return { error: false, msg: reply };
                     } else {
-                        return { error: true, msg: "Gemini boş cevap döndürdü. Filtreye takılmış olabilir." };
+                        return { error: true, msg: "Gemini boş cevap döndürdü." };
                     }
 
                 } catch (e) {
