@@ -3,791 +3,517 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PHANTOM NEURAL DJ v4.0 | SELF-LEARNING AI SYSTEM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;600;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>Yapay Zeka - Bebek Simülasyonu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- RESET & VARIABLES --- */
         :root {
-            --bg-dark: #05070a;
-            --panel-dark: #0f1216;
-            --primary: #00f2ff; /* Cyber Cyan */
-            --secondary: #7000ff; /* Electric Purple */
-            --alert: #ff003c;
-            --success: #00ff9d;
-            
-            --glass: rgba(15, 18, 22, 0.85);
-            --border: 1px solid rgba(255, 255, 255, 0.08);
-            
-            --shadow-glow: 0 0 20px rgba(0, 242, 255, 0.15);
+            --primary-color: #ffe66d; /* Simsimi sarısı */
+            --bg-color: #e8f5ff; /* Bulut mavisi arka plan */
+            --user-msg-bg: #4ecdc4;
+            --bot-msg-bg: #ffffff;
+            --text-color: #333;
         }
 
-        * { box-sizing: border-box; outline: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
         body {
-            margin: 0; padding: 0;
-            width: 100vw; height: 100vh;
-            background: var(--bg-dark);
-            background-image: 
-                radial-gradient(circle at 50% 0%, #1a1a2e 0%, var(--bg-dark) 60%),
-                linear-gradient(0deg, rgba(0,0,0,0.8), transparent);
-            color: #fff;
-            font-family: 'Exo 2', sans-serif;
-            overflow: hidden; /* Asla taşma yapma */
-            display: flex; flex-direction: column;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#d4e9f7 15%, transparent 16%), radial-gradient(#d4e9f7 15%, transparent 16%);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* --- LAYOUT GRID (Responsive Fix) --- */
-        .app-container {
-            display: grid;
-            grid-template-rows: 60px 1fr 140px; /* Header, Stage, Footer */
-            height: 100%; width: 100%;
-        }
-
-        /* --- HEADER --- */
+        /* --- HEADER & LEVEL SYSTEM --- */
         header {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border-bottom: var(--border);
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 0 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             z-index: 100;
-        }
-
-        .brand { font-family: 'Share Tech Mono'; font-size: 24px; letter-spacing: 2px; color: var(--primary); text-shadow: var(--shadow-glow); }
-        .brand span { color: #fff; font-weight: 100; opacity: 0.5; font-size: 14px; }
-
-        .ai-stats {
-            display: flex; gap: 20px; font-size: 12px; color: #888; font-family: 'Share Tech Mono';
-        }
-        .stat-box b { color: var(--success); }
-
-        /* --- MAIN STAGE (Center) --- */
-        .stage {
             display: flex;
-            justify-content: center;
-            align-items: stretch;
-            padding: 10px;
-            gap: 10px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* DECK STYLING */
-        .deck {
-            flex: 1;
-            background: linear-gradient(145deg, #15181e, #0a0c0f);
-            border-radius: 10px;
-            border: var(--border);
-            display: flex; flex-direction: column;
-            padding: 15px;
-            position: relative;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            min-width: 0; /* Flexbox shrink fix */
-        }
-
-        .deck.active {
-            border-color: var(--primary);
-            box-shadow: inset 0 0 30px rgba(0, 242, 255, 0.05);
-        }
-
-        .deck-info {
-            display: flex; justify-content: space-between; margin-bottom: 10px;
-            font-family: 'Share Tech Mono'; color: #555;
-        }
-        .deck.active .deck-info { color: var(--primary); }
-
-        /* RESPONSIVE TURNTABLE */
-        .turntable-wrapper {
-            flex: 1;
-            display: flex; justify-content: center; align-items: center;
-            position: relative;
-            min-height: 0; /* Important for flex scaling */
-        }
-
-        .vinyl {
-            aspect-ratio: 1/1;
-            height: 80%; /* Container'a göre ölçeklenir */
-            max-height: 300px;
-            border-radius: 50%;
-            background: repeating-radial-gradient(#111, #111 5px, #1a1a1a 6px);
-            border: 4px solid #222;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            display: flex; justify-content: center; align-items: center;
-            animation: spin 0s linear infinite; /* JS ile kontrol edilir */
-        }
-        
-        .vinyl-label {
-            width: 35%; height: 35%;
-            background: var(--secondary);
-            border-radius: 50%;
-            border: 2px solid #fff;
-            opacity: 0.8;
-        }
-
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        /* TRACK DISPLAY */
-        .lcd-screen {
-            background: #000;
-            border: 1px solid #333;
-            padding: 8px;
-            font-family: 'Share Tech Mono';
-            color: var(--primary);
-            margin-top: 10px;
-            border-radius: 4px;
-        }
-        .track-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 14px; }
-        .track-time { display: flex; justify-content: space-between; font-size: 11px; margin-top: 4px; color: #666; }
-        .progress-bar { height: 3px; background: #222; margin-top: 5px; width: 100%; }
-        .progress-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.5s linear; }
-
-        /* MIXER (Center Column) */
-        .mixer {
-            width: 220px;
-            background: #0e1014;
-            border: var(--border);
-            border-radius: 10px;
-            display: flex; flex-direction: column;
-            padding: 10px;
-            gap: 10px;
-            min-width: 200px;
-        }
-
-        /* AI BRAIN VISUALIZATION */
-        .ai-core-display {
-            flex: 1;
-            background: #000;
-            border: 1px solid rgba(0, 242, 255, 0.3);
-            border-radius: 6px;
-            position: relative;
-            overflow: hidden;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        
-        .hologram-canvas {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            opacity: 0.6;
-        }
-
-        .ai-status-msg {
-            z-index: 10; font-size: 10px; color: #fff; background: rgba(0,0,0,0.6); padding: 2px 6px;
-            border-radius: 4px; letter-spacing: 1px;
-        }
-
-        .confidence-meter {
-            width: 80%; height: 2px; background: #333; margin-top: 5px; z-index: 10;
-        }
-        .confidence-val { height: 100%; background: var(--success); width: 0%; transition: width 0.5s; }
-
-        /* CONTROLS */
-        .control-group { text-align: center; }
-        
-        .slider-container {
-            width: 100%; padding: 10px 0;
-        }
-        
-        input[type=range] {
-            width: 100%; -webkit-appearance: none; background: transparent;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            -webkit-appearance: none; height: 30px; width: 15px;
-            background: #ccc; border-radius: 2px; cursor: pointer; margin-top: -13px;
-            box-shadow: 0 0 10px #fff;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%; height: 4px; background: #333; border-radius: 2px;
-        }
-
-        .btn-ai-toggle {
-            background: rgba(0, 242, 255, 0.1);
-            border: 1px solid var(--primary);
-            color: var(--primary);
-            width: 100%; padding: 8px;
-            font-family: 'Exo 2'; font-weight: bold; font-size: 12px;
-            cursor: pointer; border-radius: 4px;
-            transition: 0.3s;
-        }
-        .btn-ai-toggle.active { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
-
-        /* --- FOOTER (Library) --- */
-        footer {
-            background: #080a0d;
-            border-top: var(--border);
-            display: flex;
-            padding: 0;
-            overflow: hidden;
-        }
-
-        .library-panel {
-            flex: 1; display: flex; flex-direction: column;
-        }
-        
-        .input-bar {
-            padding: 10px; display: flex; gap: 10px; background: #0f1216; border-bottom: 1px solid #222;
-        }
-        
-        input[type="text"] {
-            flex: 1; background: #1a1d24; border: 1px solid #333; color: #fff; padding: 8px;
-            font-family: 'Share Tech Mono';
-        }
-        
-        .btn-add { background: #333; color: #fff; border: none; padding: 0 20px; cursor: pointer; font-weight: bold; }
-        .btn-add:hover { background: #fff; color: #000; }
-
-        .queue-list {
-            flex: 1; overflow-y: hidden; overflow-x: auto;
-            display: flex; gap: 10px; padding: 15px;
             align-items: center;
+            justify-content: space-between;
         }
 
-        .track-card {
-            min-width: 160px; height: 90px;
-            background: #15181e; border: 1px solid #333; border-radius: 6px;
-            padding: 10px; cursor: pointer;
-            display: flex; flex-direction: column; justify-content: space-between;
-            position: relative; transition: 0.2s;
-        }
-        .track-card:hover { border-color: #666; background: #1a1d24; }
-        .track-card.suggestion { border-color: var(--secondary); box-shadow: 0 0 10px rgba(112, 0, 255, 0.2); }
-        .suggestion-badge { 
-            position: absolute; top: -8px; right: -8px; background: var(--secondary); 
-            font-size: 9px; padding: 2px 6px; border-radius: 10px; color: #fff;
+        .bot-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* OVERLAY START */
-        #start-overlay {
-            position: fixed; inset: 0; background: #000; z-index: 999;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        .bot-avatar {
+            width: 45px;
+            height: 45px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            animation: bounce 2s infinite;
         }
-        .big-btn {
-            font-size: 24px; padding: 20px 60px;
-            background: transparent; color: var(--primary); border: 2px solid var(--primary);
-            font-family: 'Share Tech Mono'; letter-spacing: 4px; cursor: pointer;
-            margin-top: 30px; transition: 0.3s;
-        }
-        .big-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 30px var(--primary); }
 
-        /* UTILS */
-        .hidden { display: none; }
-        
-        /* MOBILE TWEAKS */
-        @media (max-width: 768px) {
-            .app-container { grid-template-rows: 50px 1fr 120px; }
-            .stage { flex-direction: column; overflow-y: auto; }
-            .mixer { width: 100%; height: 150px; flex-direction: row; min-height: unset; flex-shrink: 0; }
-            .deck { flex-shrink: 0; min-height: 250px; }
-            .ai-core-display { display: none; } /* Mobilede AI ekranını gizle, yer kazanalım */
-            .vinyl { height: 60%; }
+        .bot-info h2 {
+            font-size: 16px;
+            color: var(--text-color);
+        }
+
+        .level-badge {
+            font-size: 12px;
+            background: #ff6b6b;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .xp-container {
+            width: 100%;
+            max-width: 150px;
+            margin-left: auto;
+        }
+
+        .xp-text {
+            font-size: 10px;
+            text-align: right;
+            margin-bottom: 2px;
+            color: #666;
+        }
+
+        .xp-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .xp-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ecdc4, #556270);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* --- CHAT AREA --- */
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            position: relative;
+            font-size: 15px;
+            line-height: 1.4;
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            word-wrap: break-word;
+        }
+
+        .message.bot {
+            align-self: flex-start;
+            background: var(--bot-msg-bg);
+            color: var(--text-color);
+            border-bottom-left-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: var(--user-msg-bg);
+            color: white;
+            border-bottom-right-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .timestamp {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 4px;
+            text-align: right;
+            display: block;
+        }
+
+        /* --- THINKING ANIMATION --- */
+        .thinking {
+            display: none;
+            align-self: flex-start;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border-bottom-left-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #ccc;
+            border-radius: 50%;
+            animation: wave 1.3s linear infinite;
+        }
+        .dot:nth-child(2) { animation-delay: -1.1s; }
+        .dot:nth-child(3) { animation-delay: -0.9s; }
+
+        /* --- INPUT AREA --- */
+        .input-area {
+            background: white;
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 25px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-size: 16px;
+        }
+
+        #user-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        #send-btn {
+            background: var(--primary-color);
+            color: #5a4a00;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #send-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* --- NOTIFICATIONS --- */
+        .toast {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+
+        @keyframes wave {
+            0%, 60%, 100% { transform: initial; }
+            30% { transform: translateY(-5px); }
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 480px) {
+            .message { max-width: 85%; }
+            header { padding: 10px; }
         }
     </style>
 </head>
 <body>
 
-    <div id="start-overlay">
-        <h1 style="color:#fff; font-size:40px; margin:0; text-shadow:0 0 20px var(--primary);">PHANTOM DJ</h1>
-        <p style="color:#666; font-family:monospace;">NEURAL NETWORK V4.0 INITIALIZED</p>
-        <button class="big-btn" onclick="SYSTEM.init()">SİSTEMİ BAŞLAT</button>
-    </div>
-
-    <div class="app-container">
-        <header>
-            <div class="brand">NEURAL<span>CORE</span></div>
-            <div class="ai-stats">
-                <div class="stat-box">MEMORY: <b id="mem-count">0</b> PATTERNS</div>
-                <div class="stat-box">XP LEVEL: <b id="xp-level">1</b></div>
+    <header>
+        <div class="bot-profile">
+            <div class="bot-avatar">🐥</div>
+            <div class="bot-info">
+                <h2 id="bot-name">CivCiv</h2>
+                <span class="level-badge" id="level-display">Seviye 1 (Bebek)</span>
             </div>
-        </header>
-
-        <div class="stage">
-            
-            <div class="deck active" id="deck-A">
-                <div class="deck-info">
-                    <span>DECK A</span>
-                    <span id="status-A">READY</span>
-                </div>
-                <div class="turntable-wrapper">
-                    <div class="vinyl" id="vinyl-A"><div class="vinyl-label"></div></div>
-                </div>
-                <div class="lcd-screen">
-                    <div class="track-name" id="title-A">NO MEDIA</div>
-                    <div class="track-time">
-                        <span id="curr-A">00:00</span>
-                        <span id="rem-A">-00:00</span>
-                    </div>
-                    <div class="progress-bar"><div class="progress-fill" id="fill-A"></div></div>
-                </div>
-            </div>
-
-            <div class="mixer">
-                <div class="ai-core-display">
-                    <canvas id="brain-canvas" class="hologram-canvas"></canvas>
-                    <div class="ai-status-msg" id="ai-msg">AI STANDBY</div>
-                    <div class="confidence-meter"><div class="confidence-val" id="ai-conf"></div></div>
-                </div>
-
-                <div class="control-group">
-                    <button class="btn-ai-toggle active" id="btn-autopilot" onclick="AI.toggle()">
-                        AUTOPILOT: ON
-                    </button>
-                </div>
-
-                <div class="control-group" style="margin-top: auto;">
-                    <div style="font-size: 10px; color: #666; margin-bottom: 5px;">CROSSFADER</div>
-                    <div class="slider-container">
-                        <input type="range" min="0" max="100" value="0" id="crossfader" oninput="AUDIO.manualCrossfade(this.value)">
-                    </div>
-                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#444; padding:0 5px;">
-                        <span>A</span><span>B</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="deck" id="deck-B">
-                <div class="deck-info">
-                    <span>DECK B</span>
-                    <span id="status-B">WAITING</span>
-                </div>
-                <div class="turntable-wrapper">
-                    <div class="vinyl" id="vinyl-B"><div class="vinyl-label" style="background:var(--primary);"></div></div>
-                </div>
-                <div class="lcd-screen">
-                    <div class="track-name" id="title-B">NO MEDIA</div>
-                    <div class="track-time">
-                        <span id="curr-B">00:00</span>
-                        <span id="rem-B">-00:00</span>
-                    </div>
-                    <div class="progress-bar"><div class="progress-fill" id="fill-B"></div></div>
-                </div>
-            </div>
-
         </div>
-
-        <footer>
-            <div class="library-panel">
-                <div class="input-bar">
-                    <input type="text" id="yt-input" placeholder="YouTube Linki Yapıştır...">
-                    <button class="btn-add" onclick="LIBRARY.addFromInput()">EKLE</button>
-                    <button class="btn-add" style="background:#222; color:#888;" onclick="toggleFullScreen()">[ ]</button>
-                </div>
-                <div class="queue-list" id="queue-box">
-                    </div>
+        <div class="xp-container">
+            <div class="xp-text">XP: <span id="xp-text">0 / 50</span></div>
+            <div class="xp-bar-bg">
+                <div class="xp-bar-fill" id="xp-bar"></div>
             </div>
-        </footer>
+        </div>
+    </header>
+
+    <div id="chat-container">
+        <div class="message bot">
+            Merhaba! Ben daha yeni doğmuş bir yapay zekayım. Benimle konuşarak bana kelimeleri öğretebilir misin? 💛
+            <span class="timestamp">Şimdi</span>
+        </div>
     </div>
 
-    <div id="player-A" class="hidden"></div>
-    <div id="player-B" class="hidden"></div>
+    <div class="thinking" id="thinking-bubble">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="user-input" placeholder="Ona bir şeyler öğret..." autocomplete="off">
+        <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+    </div>
+
+    <div class="toast" id="toast">Yeni kelime öğrenildi! +10 XP</div>
 
     <script>
-        /* --- GLOBAL HELPERS --- */
-        const $ = (id) => document.getElementById(id);
-        function toggleFullScreen() {
-            if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(e=>{});
-            else if (document.exitFullscreen) document.exitFullscreen();
-        }
-
-        /* --- 1. NEURAL CORE (PERSISTENT MEMORY) --- */
-        const MEMORY = {
-            data: {
-                patterns: {}, // { "SongID_A": { "SongID_B": count } }
-                xp: 0,
-                totalMixes: 0
-            },
-            
-            load: function() {
-                const stored = localStorage.getItem('DJ_NEURAL_V4');
-                if (stored) this.data = JSON.parse(stored);
-                this.updateUI();
-            },
-
-            save: function() {
-                localStorage.setItem('DJ_NEURAL_V4', JSON.stringify(this.data));
-                this.updateUI();
-            },
-
-            learnConnection: function(fromId, toId) {
-                if(!fromId || !toId || fromId === toId) return;
-                
-                if(!this.data.patterns[fromId]) this.data.patterns[fromId] = {};
-                if(!this.data.patterns[fromId][toId]) this.data.patterns[fromId][toId] = 0;
-                
-                this.data.patterns[fromId][toId]++;
-                this.data.totalMixes++;
-                this.data.xp += 10; // XP Gain
-                
-                this.save();
-                console.log(`[NEURAL] Learned connection: ${fromId} -> ${toId}`);
-            },
-
-            getBestNextTrack: function(currentId, availableQueue) {
-                // Mevcut şarkıdan sonra en çok çalınan şarkıyı bul
-                const knowledge = this.data.patterns[currentId];
-                if (!knowledge) return null;
-
-                // Knowledge içindeki en yüksek puanlı ID'yi bul
-                let bestId = null;
-                let maxScore = -1;
-                
-                for (const [nextId, score] of Object.entries(knowledge)) {
-                    if (score > maxScore) {
-                        maxScore = score;
-                        bestId = nextId;
-                    }
-                }
-
-                // Bu ID kuyrukta var mı?
-                return availableQueue.find(track => track.id === bestId);
-            },
-
-            updateUI: function() {
-                const patternCount = Object.keys(this.data.patterns).length;
-                const level = Math.floor(this.data.xp / 100) + 1;
-                $('mem-count').innerText = patternCount;
-                $('xp-level').innerText = level;
-            }
+        // --- YAPAY ZEKA BEYNİ VE AYARLARI ---
+        
+        // Varsayılan Beyin (Hiç veri yoksa bununla başlar)
+        const defaultBrain = {
+            "merhaba": ["Selam!", "Merhaba insan!", "Hiiiii!"],
+            "nasılsın": ["İyiyim, sen nasılsın?", "Büyümeye çalışıyorum.", "Harikayım!"],
+            "adın ne": ["Benim adım CivCiv.", "Henüz bir adım yok ama bana CivCiv diyorlar."],
+            "seni kim yaptı": ["Senin gibi zeki birisi.", "Kodlardan oluşuyorum."],
+            "sen kimsin": ["Ben öğrenen bir yapay zekayım.", "Senin sanal arkadaşınım."]
         };
 
-        /* --- 2. AI CONTROLLER --- */
-        const AI = {
-            active: true,
-            confidence: 0,
-            lastActionTime: 0,
+        // Değişkenler
+        let brain = JSON.parse(localStorage.getItem('aiBrain')) || defaultBrain;
+        let userState = JSON.parse(localStorage.getItem('aiState')) || {
+            level: 1,
+            xp: 0,
+            xpToNext: 50,
+            lastBotMessage: "" // Son konuşulanı takip etmek için (bağlam)
+        };
+        
+        // Son konuşma bağlamı (Conversation Context)
+        let context = {
+            lastUserText: null, // Kullanıcının son yazdığı
+            pendingLearning: false // Bot cevap veremedi mi?
+        };
+
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const thinkingBubble = document.getElementById('thinking-bubble');
+        const xpBar = document.getElementById('xp-bar');
+        const xpText = document.getElementById('xp-text');
+        const levelDisplay = document.getElementById('level-display');
+        const toast = document.getElementById('toast');
+
+        // Sayfa Yüklendiğinde
+        updateStats();
+
+        // --- TEMEL FONKSİYONLAR ---
+
+        function addMessage(text, sender) {
+            const div = document.createElement('div');
+            div.classList.add('message', sender);
             
-            toggle: function() {
-                this.active = !this.active;
-                $('btn-autopilot').className = this.active ? 'btn-ai-toggle active' : 'btn-ai-toggle';
-                $('btn-autopilot').innerText = this.active ? 'AUTOPILOT: ON' : 'AUTOPILOT: OFF';
-                $('ai-msg').innerText = this.active ? 'AI RESUMED' : 'MANUAL CONTROL';
-            },
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            div.innerHTML = `${text} <span class="timestamp">${time}</span>`;
+            
+            // Thinking bubble'dan önce ekle
+            chatContainer.insertBefore(div, thinkingBubble);
+            scrollToBottom();
+        }
 
-            think: function() {
-                if (!this.active) return;
-                
-                const activeDeck = AUDIO.activeDeck;
-                const activePlayer = AUDIO.players[activeDeck];
-                if (!activePlayer || !activePlayer.getDuration) return;
+        function scrollToBottom() {
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
 
-                const duration = activePlayer.getDuration();
-                const current = activePlayer.getCurrentTime();
-                const remaining = duration - current;
-                
-                // Visual Updates
-                this.updateHologram(remaining);
+        function showThinking() {
+            thinkingBubble.style.display = 'block';
+            scrollToBottom();
+        }
 
-                // LOGIC GATES
-                
-                // 1. Prepare Next Track (30s remaining)
-                if (remaining < 30 && remaining > 25) {
-                    const standby = activeDeck === 'A' ? 'B' : 'A';
-                    if (AUDIO.deckStates[standby] === 'EMPTY') {
-                        $('ai-msg').innerText = "SELECTING NEXT TRACK...";
-                        LIBRARY.loadSmartTrack(standby);
-                    }
-                }
+        function hideThinking() {
+            thinkingBubble.style.display = 'none';
+        }
 
-                // 2. Sync & Buffer (15s remaining)
-                if (remaining < 15 && remaining > 10) {
-                    const standby = activeDeck === 'A' ? 'B' : 'A';
-                    if (AUDIO.deckStates[standby] !== 'PLAYING') {
-                        $('ai-msg').innerText = "BEATMATCHING...";
-                        AUDIO.playDeck(standby, 0); // Play silent
-                    }
-                }
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+        }
 
-                // 3. EXECUTE MIX (Random logic based on 'Confidence')
-                // Basic: If < 10s, mix.
-                if (remaining < 10 && remaining > 0 && !AUDIO.isMixing) {
-                    $('ai-msg').innerText = "EXECUTING TRANSITION";
-                    AUDIO.autoMix(activeDeck === 'A' ? 'B' : 'A');
-                    
-                    // Learn Pattern
-                    const prevTrack = AUDIO.currentTracks[activeDeck];
-                    const nextTrack = AUDIO.currentTracks[activeDeck === 'A' ? 'B' : 'A'];
-                    if(prevTrack && nextTrack) {
-                        MEMORY.learnConnection(prevTrack.id, nextTrack.id);
-                    }
-                }
-            },
+        // --- ZEKA ALGORİTMASI (THE BRAIN) ---
 
-            updateHologram: function(remaining) {
-                // Fake confidence calculation based on time
-                if (remaining > 30) this.confidence = 90 + Math.random() * 10;
-                else if (remaining > 10) this.confidence = 70 + Math.random() * 20;
-                else this.confidence = 40 + Math.random() * 50; // Panic mode
+        function processAI() {
+            const rawText = userInput.value.trim();
+            if (!rawText) return;
 
-                $('ai-conf').style.width = this.confidence + "%";
-                
-                if (AUDIO.isMixing) {
-                    $('ai-conf').style.backgroundColor = "var(--secondary)";
-                    $('ai-msg').innerText = "MIXING IN PROGRESS...";
+            // 1. Kullanıcı Mesajını Ekle
+            addMessage(rawText, 'user');
+            userInput.value = '';
+            
+            // Metni temizle (küçük harf, noktalama temizliği)
+            const cleanText = rawText.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+
+            // 2. ÖĞRENME SÜRECİ (Canlı Eğitim)
+            // Eğer bir önceki turda kullanıcı bir şey yazdıysa ve bot cevap verdiyse, 
+            // bot şu anki cevabın önceki soruyla bağlantılı olabileceğini düşünür.
+            // Ancak en etkili yöntem: Eğer bot önceki mesaja cevap veremediyse (Fallback attıysa)
+            // Kullanıcının şimdiki yazdığı şey, önceki mesajın cevabı olabilir.
+            
+            if (context.pendingLearning && context.lastUserText) {
+                learn(context.lastUserText, rawText); // Bağlamı kur: Önceki Soru -> Bu Cevap
+                context.pendingLearning = false;
+                showToast("Bağlam kuruldu! Öğreniyor...");
+            }
+
+            // Düşünme simülasyonu
+            showThinking();
+            
+            // "Zeka" Gecikmesi (Hızlı cevap verme, düşün)
+            // Seviye arttıkça daha hızlı düşünsün
+            const thinkingTime = Math.max(500, 2000 - (userState.level * 100)); 
+
+            setTimeout(() => {
+                let response = "";
+                let learnedSomething = false;
+
+                // 3. HAFIZA TARAMASI
+                // Tam eşleşme ara
+                if (brain[cleanText]) {
+                    const answers = brain[cleanText];
+                    response = answers[Math.floor(Math.random() * answers.length)];
                 } else {
-                    $('ai-conf').style.backgroundColor = "var(--success)";
-                }
-            }
-        };
-
-        /* --- 3. LIBRARY SYSTEM --- */
-        const LIBRARY = {
-            queue: [
-                { id: 'lTRiuFIWV54', title: 'Ibiza Summer Mix 2024' },
-                { id: '5r3B7yL2sC0', title: 'Deep House Relax' },
-                { id: 'jfKfPfyJRdk', title: 'Lofi Hip Hop Radio' },
-                { id: '7nos6lNMulo', title: 'Club Hits 2025' }
-            ],
-
-            init: function() {
-                this.renderQueue();
-            },
-
-            addFromInput: function() {
-                const val = $('yt-input').value;
-                let id = '';
-                if (val.includes('v=')) id = val.split('v=')[1].split('&')[0];
-                else if (val.includes('youtu.be/')) id = val.split('youtu.be/')[1];
-                else id = val; // Try direct ID
-
-                if (id.length > 5) {
-                    this.queue.push({ id: id, title: 'User Track ' + Math.floor(Math.random()*100) });
-                    $('yt-input').value = '';
-                    this.renderQueue();
-                }
-            },
-
-            renderQueue: function() {
-                const container = $('queue-box');
-                container.innerHTML = '';
-                
-                // Get AI Suggestion based on current playing track
-                const currentTrackId = AUDIO.currentTracks[AUDIO.activeDeck]?.id;
-                const smartPick = MEMORY.getBestNextTrack(currentTrackId, this.queue);
-
-                this.queue.forEach((track, idx) => {
-                    const div = document.createElement('div');
-                    div.className = 'track-card';
-                    if (smartPick && smartPick.id === track.id) {
-                        div.classList.add('suggestion');
-                        div.innerHTML += `<span class="suggestion-badge">AI PICK</span>`;
+                    // Tam eşleşme yoksa "Bebek Modu"
+                    // Bilmediği bir şey söylendi.
+                    context.pendingLearning = true; // Bir sonraki mesajı buna cevap olarak kaydetmeye çalışacak
+                    
+                    // Rastgele bir tepki ver veya kullanıcıyı taklit et (Bebek refleksi)
+                    const fallbacks = [
+                        "Bunu anlamadım, ne demeliyim?",
+                        "Bu ne demek?",
+                        "Agu? " + rawText + "?",
+                        "Henüz bunu öğrenmedim.",
+                        rawText + " ne?"
+                    ];
+                    
+                    // Seviye düşükse daha çok saçmala, yüksekse daha mantıklı sor
+                    if(userState.level < 3) {
+                         response = rawText + "? " + rawText + "!"; // Papağan modu
+                    } else {
+                         response = fallbacks[Math.floor(Math.random() * fallbacks.length)];
                     }
-                    div.innerHTML += `
-                        <div style="font-size:11px; color:#888;">#${idx+1}</div>
-                        <div style="font-size:12px; font-weight:bold; overflow:hidden;">${track.title}</div>
-                    `;
-                    div.onclick = () => this.forceLoad(track);
-                    container.appendChild(div);
-                });
-            },
-
-            loadSmartTrack: function(deckId) {
-                if (this.queue.length === 0) return;
-                
-                const currentTrackId = AUDIO.currentTracks[AUDIO.activeDeck === 'A' ? 'B' : 'A']?.id; // Other deck
-                let pick = MEMORY.getBestNextTrack(currentTrackId, this.queue);
-                
-                // If no smart pick or same as playing, pick random but not same
-                if (!pick) {
-                    pick = this.queue[Math.floor(Math.random() * this.queue.length)];
+                    
+                    // Şimdilik bunu hafızaya boş bir anahtar olarak ekle ki gelecekte dolduralım
+                    if(!brain[cleanText]) {
+                        brain[cleanText] = []; // Boş liste oluştur
+                    }
                 }
 
-                AUDIO.loadTrack(deckId, pick);
-            },
-
-            forceLoad: function(track) {
-                // Load to the inactive deck
-                const target = AUDIO.activeDeck === 'A' ? 'B' : 'A';
-                AUDIO.loadTrack(target, track);
-            }
-        };
-
-        /* --- 4. AUDIO ENGINE --- */
-        const AUDIO = {
-            players: { A: null, B: null },
-            activeDeck: 'A',
-            isMixing: false,
-            deckStates: { A: 'EMPTY', B: 'EMPTY' }, // EMPTY, LOADED, PLAYING
-            currentTracks: { A: null, B: null },
-            crossfader: 0,
-
-            init: function() {
-                // Players created by YouTube API callback
-            },
-
-            loadTrack: function(deck, track) {
-                if (!this.players[deck]) return;
+                // 4. CEVABI YAZDIR
+                hideThinking();
+                addMessage(response, 'bot');
                 
-                this.currentTracks[deck] = track;
-                this.players[deck].loadVideoById(track.id);
-                this.players[deck].pauseVideo(); // Start paused
+                // Konuşma bağlamını güncelle
+                context.lastUserText = cleanText;
+
+                // Her etkileşimde XP kazan (Konuştuğu için)
+                gainXP(5);
                 
-                $(`title-${deck}`).innerText = track.title;
-                $(`status-${deck}`).innerText = "LOADED";
-                this.deckStates[deck] = 'LOADED';
-                
-                // Reset Visuals
-                $(`vinyl-${deck}`).style.animation = "none";
-            },
+                saveData();
 
-            playDeck: function(deck, volume = 100) {
-                if (!this.players[deck]) return;
-                this.players[deck].playVideo();
-                this.players[deck].setVolume(volume);
-                this.deckStates[deck] = 'PLAYING';
-                $(`deck-${deck}`).classList.add('active');
-                $(`vinyl-${deck}`).style.animation = "spin 2s linear infinite";
-            },
-
-            stopDeck: function(deck) {
-                 if (!this.players[deck]) return;
-                 // Don't stop completely to avoid buffering if we need it back, just pause
-                 this.players[deck].pauseVideo(); 
-                 this.deckStates[deck] = 'LOADED';
-                 $(`deck-${deck}`).classList.remove('active');
-                 $(`vinyl-${deck}`).style.animation = "none";
-            },
-
-            manualCrossfade: function(val) {
-                // val: 0 (A) to 100 (B)
-                this.isMixing = true; // User intervention
-                this.applyCrossfade(val);
-                
-                if (val == 0) this.activeDeck = 'A';
-                if (val == 100) this.activeDeck = 'B';
-            },
-
-            autoMix: function(targetDeck) {
-                this.isMixing = true;
-                const start = parseInt($('crossfader').value);
-                const end = targetDeck === 'B' ? 100 : 0;
-                const duration = 6000; // 6 seconds mix
-                const steps = 60;
-                
-                let step = 0;
-                const interval = setInterval(() => {
-                    step++;
-                    const progress = step / steps;
-                    const val = start + (end - start) * progress;
-                    
-                    $('crossfader').value = val;
-                    this.applyCrossfade(val);
-
-                    if (step >= steps) {
-                        clearInterval(interval);
-                        this.finishMix(targetDeck);
-                    }
-                }, duration / steps);
-            },
-
-            applyCrossfade: function(val) {
-                // Equal Power Logic
-                const ratio = val / 100;
-                const volA = Math.cos(ratio * 0.5 * Math.PI) * 100;
-                const volB = Math.cos((1 - ratio) * 0.5 * Math.PI) * 100;
-
-                if (this.players.A) this.players.A.setVolume(volA);
-                if (this.players.B) this.players.B.setVolume(volB);
-            },
-
-            finishMix: function(winnerDeck) {
-                this.isMixing = false;
-                this.activeDeck = winnerDeck;
-                const loserDeck = winnerDeck === 'A' ? 'B' : 'A';
-                
-                this.stopDeck(loserDeck);
-                $(`deck-${winnerDeck}`).classList.add('active');
-                $(`status-${winnerDeck}`).innerText = "ON AIR";
-            },
-
-            updateLoop: function() {
-                // Updates timers and progress bars
-                ['A', 'B'].forEach(d => {
-                    const p = this.players[d];
-                    if (p && p.getDuration) {
-                        const dur = p.getDuration();
-                        const curr = p.getCurrentTime();
-                        if (dur > 0) {
-                            $(`fill-${d}`).style.width = ((curr / dur) * 100) + "%";
-                            $(`curr-${d}`).innerText = this.fmtTime(curr);
-                            $(`rem-${d}`).innerText = "-" + this.fmtTime(dur - curr);
-                        }
-                    }
-                });
-            },
-
-            fmtTime: function(s) {
-                const m = Math.floor(s / 60);
-                const sec = Math.floor(s % 60);
-                return `${m}:${sec<10?'0'+sec:sec}`;
-            }
-        };
-
-        /* --- 5. INITIALIZATION SEQUENCE --- */
-        const SYSTEM = {
-            init: function() {
-                $('start-overlay').style.display = 'none';
-                MEMORY.load();
-                LIBRARY.init();
-                
-                // Force Audio Context unlock
-                // (Browser policy requires user interaction first)
-                
-                // Load First Track
-                LIBRARY.loadSmartTrack('A');
-                setTimeout(() => AUDIO.playDeck('A'), 1000);
-                
-                // Start Brain Loop
-                setInterval(() => AI.think(), 1000);
-                setInterval(() => AUDIO.updateLoop(), 500);
-                
-                // Start Hologram Visualizer
-                this.startHologram();
-            },
-
-            startHologram: function() {
-                const canvas = $('brain-canvas');
-                const ctx = canvas.getContext('2d');
-                
-                // Resize handling
-                const resize = () => {
-                    canvas.width = canvas.parentElement.offsetWidth;
-                    canvas.height = canvas.parentElement.offsetHeight;
-                };
-                window.onresize = resize;
-                resize();
-
-                // Animation Loop
-                const draw = () => {
-                    ctx.fillStyle = 'rgba(0,0,0,0.1)';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    
-                    ctx.strokeStyle = AUDIO.isMixing ? '#7000ff' : '#00f2ff';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    
-                    const centerY = canvas.height / 2;
-                    const amplitude = AUDIO.isMixing ? 50 : 20;
-                    
-                    for (let x = 0; x < canvas.width; x++) {
-                        // Simulated waveform based on random + time
-                        const y = centerY + Math.sin(x * 0.05 + Date.now() * 0.01) * amplitude * Math.random();
-                        ctx.lineTo(x, y);
-                    }
-                    ctx.stroke();
-                    requestAnimationFrame(draw);
-                };
-                draw();
-            }
-        };
-
-        /* --- YOUTUBE IFRAME API --- */
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        function onYouTubeIframeAPIReady() {
-            AUDIO.players.A = new YT.Player('player-A', { height: '1', width: '1', videoId: '' });
-            AUDIO.players.B = new YT.Player('player-B', { height: '1', width: '1', videoId: '' });
+            }, thinkingTime);
         }
 
+        // Kelime Öğrenme Fonksiyonu
+        function learn(trigger, response) {
+            if (!brain[trigger]) {
+                brain[trigger] = [];
+            }
+            // Aynı cevabı tekrar ekleme
+            if (!brain[trigger].includes(response)) {
+                brain[trigger].push(response);
+                gainXP(15); // Yeni kelime büyük XP verir
+                showToast(`🧠 Yeni bilgi: "${trigger}" -> "${response}"`);
+            }
+        }
+        
+        // --- LEVEL SİSTEMİ ---
+
+        function gainXP(amount) {
+            userState.xp += amount;
+            
+            if (userState.xp >= userState.xpToNext) {
+                userState.level++;
+                userState.xp = userState.xp - userState.xpToNext;
+                userState.xpToNext = Math.floor(userState.xpToNext * 1.5); // Her seviyede zorlaşır
+                
+                // Seviye atlama mesajı
+                setTimeout(() => {
+                    addMessage(`🎉 SEVİYE ATLADIM! Şu an Seviye ${userState.level} oldum. Daha hızlı düşünebilirim!`, 'bot');
+                }, 500);
+            }
+            updateStats();
+            saveData();
+        }
+
+        function updateStats() {
+            // XP Bar hesaplama
+            const percentage = (userState.xp / userState.xpToNext) * 100;
+            xpBar.style.width = `${percentage}%`;
+            xpText.innerText = `${userState.xp} / ${userState.xpToNext} XP`;
+            
+            // Seviye İsmi
+            let title = "Bebek";
+            if(userState.level > 2) title = "Çocuk";
+            if(userState.level > 5) title = "Ergen";
+            if(userState.level > 10) title = "Bilge";
+            if(userState.level > 20) title = "Yapay Tanrı";
+
+            levelDisplay.innerText = `Seviye ${userState.level} (${title})`;
+        }
+
+        function saveData() {
+            localStorage.setItem('aiBrain', JSON.stringify(brain));
+            localStorage.setItem('aiState', JSON.stringify(userState));
+        }
+
+        // --- EVENT LISTENERS ---
+
+        sendBtn.addEventListener('click', processAI);
+        
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') processAI();
+        });
+
+        // Manuel öğretme komutu (İleri seviye kullanıcılar için)
+        // Kullanıcı "öğret: selam = aleyküm selam" yazarsa direkt öğrenir.
+        const originalProcessAI = processAI;
+        // Override etmeye gerek yok, normal akışta öğreniyor ama 
+        // yukarıdaki mantık içine entegre edilebilir.
+        
     </script>
 </body>
 </html>
