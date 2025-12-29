@@ -3,74 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SimSimi Pro - Gemini AI (Auto-Fix)</title>
+    <title>SimSimi Pro - Hibrit AI</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- 1. GÖRSEL AYARLAR --- */
+        /* --- GÖRSEL AYARLAR --- */
         :root {
-            --primary: #6c5ce7; /* Modern Mor */
-            --primary-dark: #5849be;
-            --secondary: #00cec9;
-            --accent: #ff7675;
-            --bg-color: #dfe6e9;
-            --chat-bg: #e2e8f0;
-            --text-main: #2d3436;
+            --primary: #4834d4; /* Derin Mor */
+            --secondary: #686de0;
+            --accent: #ff7979;
+            --bg-color: #dff9fb;
+            --chat-bg: #c7ecee;
+            --text-main: #130f40;
             --white: #ffffff;
-            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+            --shadow: 0 5px 15px rgba(0,0,0,0.1);
             --radius: 20px;
             --font: 'Segoe UI', sans-serif;
         }
 
         [data-theme="dark"] {
-            --bg-color: #1e1e1e;
-            --chat-bg: #2d2d2d;
-            --text-main: #ecf0f1;
-            --white: #34495e;
-            --primary: #a29bfe;
+            --bg-color: #1e272e;
+            --chat-bg: #2d3436;
+            --text-main: #d2dae2;
+            --white: #485460;
+            --primary: #808e9b;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
+        * { margin: 0; padding: 0; box-sizing: border-box; outline: none; }
         body { font-family: var(--font); background: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text-main); }
 
         /* --- HEADER --- */
         header {
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(5px);
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(8px);
             padding: 10px 20px; display: flex; align-items: center; justify-content: space-between;
-            box-shadow: var(--shadow); z-index: 100;
+            box-shadow: var(--shadow); z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-        [data-theme="dark"] header { background: rgba(44, 62, 80, 0.95); }
+        [data-theme="dark"] header { background: rgba(30, 39, 46, 0.95); }
 
-        .bot-info { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .bot-info { display: flex; align-items: center; gap: 12px; }
         .avatar { 
             width: 50px; height: 50px; background: linear-gradient(135deg, var(--primary), var(--secondary));
             border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 24px; color: white; border: 3px solid var(--white); box-shadow: var(--shadow);
-            animation: pulse 2s infinite;
+            font-size: 26px; color: white; border: 3px solid var(--white); box-shadow: var(--shadow);
+            position: relative;
         }
-        .stats h2 { font-size: 16px; margin: 0; font-weight: bold; }
+        /* Bağlantı Durumu Işığı */
+        .status-dot {
+            width: 12px; height: 12px; background: #4cd137; border: 2px solid white; 
+            border-radius: 50%; position: absolute; bottom: 0; right: 0;
+            transition: background 0.3s;
+        }
+        .status-dot.offline { background: #fbc531; } /* Sarı: Yerel mod */
+
+        .stats h2 { font-size: 16px; margin: 0; font-weight: 700; }
         .stats p { font-size: 11px; opacity: 0.8; }
 
         .header-actions .icon-btn {
             background: transparent; border: none; font-size: 20px; color: var(--text-main);
             padding: 8px; cursor: pointer; transition: 0.2s;
         }
-        .header-actions .icon-btn:hover { color: var(--primary); transform: scale(1.1); }
+        .header-actions .icon-btn:hover { color: var(--accent); transform: scale(1.1); }
 
         .xp-bar { position: absolute; bottom: 0; left: 0; height: 4px; background: linear-gradient(90deg, var(--secondary), var(--accent)); width: 0%; transition: width 0.5s; }
 
         /* --- CHAT AREA --- */
         #chat-box {
             flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
-            background: var(--chat-bg); background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 20px 20px;
+            background: var(--chat-bg); background-image: radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px); background-size: 20px 20px;
         }
 
         .msg {
-            max-width: 85%; padding: 12px 16px; border-radius: var(--radius); font-size: 15px; line-height: 1.5;
+            max-width: 85%; padding: 12px 18px; border-radius: var(--radius); font-size: 15px; line-height: 1.5;
             position: relative; animation: slideIn 0.3s ease; word-wrap: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
         .msg.bot { align-self: flex-start; background: var(--white); border-bottom-left-radius: 4px; }
         .msg.user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
-        .msg.error { align-self: center; background: #e74c3c; color: white; font-size: 12px; max-width: 90%; text-align: center; }
         
         .time { font-size: 10px; opacity: 0.6; display: block; text-align: right; margin-top: 5px; }
 
@@ -82,49 +88,46 @@
         [data-theme="dark"] .input-area { background: #34495e; }
 
         input {
-            flex: 1; padding: 14px; border: 2px solid #ddd; background: var(--bg-color);
+            flex: 1; padding: 14px 20px; border: 2px solid transparent; background: var(--bg-color);
             border-radius: 30px; font-size: 16px; color: var(--text-main); transition: 0.3s;
         }
-        input:focus { border-color: var(--primary); background: var(--white); }
+        input:focus { border-color: var(--primary); background: var(--white); box-shadow: 0 0 0 3px rgba(72, 52, 212, 0.1); }
         button {
-            width: 50px; height: 50px; border: none; border-radius: 50%;
+            width: 52px; height: 52px; border: none; border-radius: 50%;
             background: var(--primary); color: white; font-size: 20px; cursor: pointer;
             display: flex; align-items: center; justify-content: center; transition: 0.2s;
             box-shadow: var(--shadow);
         }
-        button:active { transform: scale(0.9); }
+        button:active { transform: scale(0.95); }
 
-        /* --- MODALS & UTILS --- */
+        /* --- UTILS & MODALS --- */
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 999;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 999;
             display: none; align-items: center; justify-content: center; opacity: 0; transition: 0.3s;
         }
         .modal-overlay.active { display: flex; opacity: 1; }
         .modal {
             background: var(--white); width: 90%; max-width: 400px; padding: 25px;
             border-radius: 20px; transform: translateY(20px); transition: 0.3s;
-            max-height: 80vh; overflow-y: auto;
+            max-height: 80vh; overflow-y: auto; box-shadow: var(--shadow);
         }
         .modal-overlay.active .modal { transform: translateY(0); }
-        .modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
         
         .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .shop-item { border: 1px solid #eee; padding: 10px; text-align: center; border-radius: 10px; cursor: pointer; }
-        .shop-item:hover { background: var(--bg-color); border-color: var(--primary); }
-        .shop-item.owned { background: rgba(46, 213, 115, 0.1); border-color: #2ed573; }
+        .shop-item { border: 1px solid #eee; padding: 10px; text-align: center; border-radius: 12px; cursor: pointer; background: var(--bg-color); }
+        .shop-item:hover { transform: translateY(-3px); border-color: var(--secondary); }
 
-        .typing { align-self: flex-start; background: var(--white); padding: 10px 15px; border-radius: 20px; display: none; gap: 5px; margin-bottom: 10px; }
+        .typing { align-self: flex-start; background: var(--white); padding: 12px 18px; border-radius: 20px; display: none; gap: 5px; margin-bottom: 10px; }
         .dot { width: 6px; height: 6px; background: #bbb; border-radius: 50%; animation: bounce 1.4s infinite; }
         .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
 
         @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
-        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(108, 92, 231, 0); } 100% { box-shadow: 0 0 0 0 rgba(108, 92, 231, 0); } }
 
         #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2000; }
-        .toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: #2d3436; color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 2001; }
-        .toast.show { opacity: 1; top: 90px; }
+        .toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: #2d3436; color: white; padding: 10px 20px; border-radius: 30px; font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 2001; }
+        .toast.show { opacity: 1; top: 100px; }
 
     </style>
 </head>
@@ -133,9 +136,12 @@
 
     <header>
         <div class="bot-info" onclick="UI.openModal('stats-modal')">
-            <div class="avatar" id="avatar-display"><i class="fas fa-robot"></i></div>
+            <div class="avatar">
+                <span id="avatar-icon">🤖</span>
+                <div class="status-dot" id="status-dot"></div>
+            </div>
             <div class="stats">
-                <h2 id="bot-name">Gemini AI</h2>
+                <h2 id="bot-name">Hibrit AI</h2>
                 <p id="level-txt">Seviye 1 | 0 XP</p>
             </div>
         </div>
@@ -148,8 +154,8 @@
 
     <div id="chat-box">
         <div class="msg bot">
-            Selam! Ben artık gerçek bir Yapay Zekayım. 🧠⚡<br>
-            Bana istediğin her şeyi sorabilirsin. Başlayalım mı?
+            Merhaba! Ben "Hibrit" yapay zekayım. 🧠<br>
+            Önce Google Gemini'ye bağlanmayı denerim. Eğer hata verirse kendi yerel beynimi kullanırım. Böylece seni asla cevapsız bırakmam! 🚀
             <span class="time">Şimdi</span>
         </div>
     </div>
@@ -159,108 +165,142 @@
     </div>
 
     <div class="input-area">
-        <input type="text" id="input" placeholder="Bir şeyler sor..." autocomplete="off">
+        <input type="text" id="input" placeholder="Bir şeyler yaz..." autocomplete="off">
         <button id="send"><i class="fas fa-paper-plane"></i></button>
     </div>
 
     <div class="modal-overlay" id="shop-modal">
         <div class="modal">
-            <div class="modal-header"><h2>Market</h2><span style="cursor:pointer" onclick="UI.closeModal('shop-modal')">✕</span></div>
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h2>Market</h2><span style="cursor:pointer" onclick="UI.closeModal('shop-modal')">✕</span></div>
             <div class="shop-grid" id="shop-grid"></div>
         </div>
     </div>
 
     <div class="modal-overlay" id="settings-modal">
         <div class="modal">
-            <div class="modal-header"><h2>Ayarlar</h2><span style="cursor:pointer" onclick="UI.closeModal('settings-modal')">✕</span></div>
-            <div style="padding:10px 0; border-bottom:1px solid #eee; display:flex; justify-content:space-between;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h2>Ayarlar</h2><span style="cursor:pointer" onclick="UI.closeModal('settings-modal')">✕</span></div>
+            <div style="padding:10px 0; display:flex; justify-content:space-between;">
                 <span>Karanlık Mod</span><input type="checkbox" onchange="UI.toggleTheme(this.checked)">
             </div>
-            <button style="width:100%; margin-top:15px; background:#e74c3c; color:white; padding:10px; border-radius:10px; border:none;" onclick="AppState.reset()">Sıfırla</button>
+            <button style="width:100%; margin-top:15px; padding:12px; background:#ff7675; color:white; border:none; border-radius:10px;" onclick="AppState.reset()">Verileri Sıfırla</button>
         </div>
     </div>
 
     <div class="modal-overlay" id="stats-modal">
         <div class="modal">
-            <div class="modal-header"><h2>İstatistikler</h2><span style="cursor:pointer" onclick="UI.closeModal('stats-modal')">✕</span></div>
-            <p>Model: <b id="current-model">Otomatik</b></p>
-            <p>Mesaj: <b id="stat-msg">0</b></p>
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px;"><h2>Durum</h2><span style="cursor:pointer" onclick="UI.closeModal('stats-modal')">✕</span></div>
+            <p>Çalışma Modu: <b id="current-mode">Otomatik</b></p>
             <p>Seviye: <b id="stat-lvl">1</b></p>
+            <p>XP: <b id="stat-xp">0</b></p>
         </div>
     </div>
 
     <div class="toast" id="toast">Bildirim</div>
 
     <script>
-        // --- 1. SİSTEM ---
+        // --- 1. VERİ SİSTEMİ ---
         const AppState = {
-            data: JSON.parse(localStorage.getItem('geminiData')) || { level: 1, xp: 0, xpReq: 50, msgCount: 0, inventory: ['default'], equipped: 'default' },
+            data: JSON.parse(localStorage.getItem('hybridData')) || { 
+                level: 1, xp: 0, xpReq: 50, msgCount: 0, 
+                inventory: ['default'], equipped: 'default' 
+            },
             history: [],
-            save() { localStorage.setItem('geminiData', JSON.stringify(this.data)); },
-            reset() { localStorage.removeItem('geminiData'); location.reload(); }
+            save() { localStorage.setItem('hybridData', JSON.stringify(this.data)); },
+            reset() { localStorage.removeItem('hybridData'); location.reload(); }
         };
 
-        // --- 2. AKILLI BEYİN MOTORU ---
-        const BrainEngine = {
-            apiKey: "AIzaSyB7BvLeZ-ZJurhoimp82jn3WLItXFB3xeo", 
-            // Denenecek modeller sırasıyla (Biri çalışmazsa diğerine geçer)
-            models: ["gemini-1.5-flash", "gemini-1.5-flash-001", "gemini-pro"],
-            currentModelIndex: 0,
+        // --- 2. YEREL BEYİN (YEDEK SİSTEM) ---
+        const LocalBrain = {
+            memory: {
+                "merhaba": ["Selam!", "Merhaba dostum!", "Hoş geldin!"],
+                "nasılsın": ["Harikayım, sen?", "Kodlarım tıkırında işliyor.", "Bomba gibiyim!"],
+                "adın ne": ["Ben Hibrit AI.", "Adım yok ama bana Zeki diyebilirsin."],
+                "ne yapıyorsun": ["Seninle sohbet ediyorum.", "Dünyayı ele geçirme planları... Şaka şaka!"],
+                "kimsin": ["Ben hem bulut hem yerel çalışan bir yapay zekayım."]
+            },
             
-            systemPrompt: `Sen çok zeki, yardımsever ve esprili bir yapay zeka asistanısın. Kullanıcı ile samimi konuş, kısa ve net cevaplar ver. Asla kabalık yapma.`,
-
-            async process(text) {
-                // Konuşma Geçmişi
-                let context = this.systemPrompt + "\n";
-                AppState.history.slice(-6).forEach(m => context += `${m.role === 'user' ? 'Kullanıcı' : 'Sen'}: ${m.text}\n`);
-                context += `Kullanıcı: ${text}\nSen:`;
-
-                // Modelleri sırayla dene
-                for (let i = 0; i < this.models.length; i++) {
-                    const modelName = this.models[i];
-                    console.log(`Model deneniyor: ${modelName}`);
-                    
-                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${this.apiKey}`;
-
-                    try {
-                        const response = await fetch(apiUrl, {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ contents: [{ parts: [{ text: context }] }] })
-                        });
-
-                        const data = await response.json();
-
-                        // Hata varsa bir sonraki modeli dene
-                        if (data.error) {
-                            console.warn(`${modelName} hatası:`, data.error.message);
-                            continue; // Döngüye devam et (Sonraki model)
-                        }
-
-                        // Başarılı!
-                        if (data.candidates && data.candidates.length > 0) {
-                            const reply = data.candidates[0].content.parts[0].text;
-                            AppState.history.push({role:'user', text: text});
-                            AppState.history.push({role:'bot', text: reply});
-                            document.getElementById('current-model').innerText = modelName;
-                            return { error: false, msg: reply };
-                        }
-
-                    } catch (e) {
-                        console.error("Bağlantı hatası:", e);
+            // Basit benzerlik bulucu
+            find(text) {
+                const clean = text.toLowerCase().trim();
+                const keys = Object.keys(this.memory);
+                // Basit eşleşme (içeriyor mu?)
+                for(let key of keys) {
+                    if(clean.includes(key) || key.includes(clean)) {
+                        const answers = this.memory[key];
+                        return answers[Math.floor(Math.random() * answers.length)];
                     }
                 }
+                return null; // Bilmiyor
+            },
 
-                // Hiçbiri çalışmadıysa
-                return { error: true, msg: "Üzgünüm, şu an tüm modeller meşgul veya hata veriyor. Daha sonra tekrar dene. 😔" };
+            learn(question, answer) {
+                // Basit öğrenme: Gelecekte kullanılabilir
+                this.memory[question.toLowerCase()] = [answer];
             }
         };
 
-        // --- 3. UI YÖNETİMİ ---
+        // --- 3. AKILLI BEYİN MOTORU (HİBRİT) ---
+        const HybridBrain = {
+            apiKey: "AIzaSyB7BvLeZ-ZJurhoimp82jn3WLItXFB3xeo",
+            models: ["gemini-1.5-flash", "gemini-1.5-flash-latest"],
+            
+            async process(text) {
+                UI.setStatus('connecting'); // Bağlanıyor (Yeşil yanıp söner gibi)
+                
+                // 1. ADIM: API DENE
+                try {
+                    const context = `Sen kısa, net ve samimi cevaplar veren bir asistansın. Kullanıcı: ${text}`;
+                    
+                    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
+                    
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: context }] }] })
+                    });
+
+                    const data = await response.json();
+
+                    if (!data.error && data.candidates) {
+                        UI.setStatus('online'); // Online (Yeşil)
+                        return { 
+                            msg: data.candidates[0].content.parts[0].text, 
+                            source: 'Gemini (Cloud)' 
+                        };
+                    }
+                    throw new Error("API Hatası");
+
+                } catch (e) {
+                    console.log("API Hatası, Yerel Moda Geçiliyor...", e);
+                    UI.setStatus('offline'); // Offline (Sarı)
+                    
+                    // 2. ADIM: YEREL BEYİN (FALLBACK)
+                    const localReply = LocalBrain.find(text);
+                    
+                    if (localReply) {
+                        return { msg: localReply, source: 'Yerel Hafıza' };
+                    } else {
+                        // Yerel de bilmiyorsa genel cevap
+                        const fallbacks = [
+                            "İnternetim koptu ve bunu yerel hafızamda bulamadım. Başka bir şey sor?",
+                            "Şu an Google amcalara ulaşamıyorum. Basit konuşalım mı?",
+                            "Bağlantı hatası var ama ben buradayım! Sadece bu soruyu anlamadım."
+                        ];
+                        return { 
+                            msg: fallbacks[Math.floor(Math.random() * fallbacks.length)], 
+                            source: 'Sistem Mesajı' 
+                        };
+                    }
+                }
+            }
+        };
+
+        // --- 4. UI YÖNETİMİ ---
         const UI = {
             chatBox: document.getElementById('chat-box'),
             input: document.getElementById('input'),
             typing: document.getElementById('typing'),
+            statusDot: document.getElementById('status-dot'),
 
             init() {
                 this.updateStats();
@@ -269,12 +309,25 @@
                 this.input.onkeypress = (e) => { if(e.key === 'Enter') this.handleSend(); };
             },
 
+            setStatus(status) {
+                if(status === 'online') {
+                    this.statusDot.style.background = '#4cd137'; // Yeşil
+                    document.getElementById('current-mode').innerText = "Online (Gemini)";
+                } else if(status === 'offline') {
+                    this.statusDot.style.background = '#fbc531'; // Sarı
+                    document.getElementById('current-mode').innerText = "Offline (Yerel)";
+                } else {
+                    this.statusDot.style.background = '#00a8ff'; // Mavi (İşleniyor)
+                }
+            },
+
             addMsg(text, type) {
                 const div = document.createElement('div');
                 div.className = `msg ${type}`;
                 const time = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-                let cleanText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
-                div.innerHTML = `${cleanText} <span class="time">${time}</span>`;
+                // Markdown Bold Fix
+                let clean = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                div.innerHTML = `${clean} <span class="time">${time}</span>`;
                 this.chatBox.appendChild(div);
                 this.chatBox.scrollTop = this.chatBox.scrollHeight;
             },
@@ -288,18 +341,18 @@
                 this.typing.style.display = 'flex';
                 this.chatBox.scrollTop = this.chatBox.scrollHeight;
 
-                const result = await BrainEngine.process(txt);
+                // HİBRİT İŞLEM
+                const result = await HybridBrain.process(txt);
                 
                 this.typing.style.display = 'none';
+                this.addMsg(result.msg, 'bot');
+                
+                // Kaynak bilgisi (Opsiyonel: Konsola yaz)
+                console.log(`Cevap Kaynağı: ${result.source}`);
 
-                if(result.error) {
-                    this.addMsg(`⚠️ ${result.msg}`, 'error');
-                } else {
-                    this.addMsg(result.msg, 'bot');
-                    this.gainXP(15);
-                    AppState.data.msgCount++;
-                    AppState.save();
-                }
+                this.gainXP(10);
+                AppState.data.msgCount++;
+                AppState.save();
                 this.updateStats();
             },
 
@@ -309,7 +362,7 @@
                     AppState.data.level++;
                     AppState.data.xp = 0;
                     AppState.data.xpReq = Math.floor(AppState.data.xpReq * 1.5);
-                    this.showToast(`🎉 Seviye ${AppState.data.level} Oldun!`);
+                    this.showToast(`🎉 Seviye ${AppState.data.level}!`);
                     Confetti.fire();
                 }
                 AppState.save();
@@ -319,34 +372,34 @@
             updateStats() {
                 const p = (AppState.data.xp / AppState.data.xpReq) * 100;
                 document.getElementById('xp-bar').style.width = `${p}%`;
-                document.getElementById('level-txt').innerText = `Seviye ${AppState.data.level} | ${AppState.data.xp} XP`;
-                document.getElementById('stat-msg').innerText = AppState.data.msgCount;
+                document.getElementById('level-txt').innerText = `Lvl ${AppState.data.level} | ${AppState.data.xp} XP`;
                 document.getElementById('stat-lvl').innerText = AppState.data.level;
+                document.getElementById('stat-xp').innerText = AppState.data.xp;
                 
-                const icons = {'default':'<i class="fas fa-robot"></i>', 'cat':'🐱', 'alien':'👽', 'ghost':'👻'};
-                document.getElementById('avatar-display').innerHTML = icons[AppState.data.equipped] || icons['default'];
+                const icons = {'default':'🤖', 'cat':'🐱', 'alien':'👽', 'ghost':'👻'};
+                document.getElementById('avatar-icon').innerText = icons[AppState.data.equipped] || '🤖';
             },
 
-            openModal(id) { document.getElementById(id).classList.add('active'); this.updateStats(); },
+            // Market
+            openModal(id) { document.getElementById(id).classList.add('active'); },
             closeModal(id) { document.getElementById(id).classList.remove('active'); },
             
             shopItems: [
-                {id:'cat', name:'Kedi Modu', icon:'🐱', price:100},
+                {id:'cat', name:'Kedi', icon:'🐱', price:100},
                 {id:'alien', name:'Uzaylı', icon:'👽', price:300},
                 {id:'ghost', name:'Hayalet', icon:'👻', price:600}
             ],
 
             renderShop() {
                 const grid = document.getElementById('shop-grid');
-                grid.innerHTML = '';
-                grid.innerHTML += `<div class="shop-item" onclick="UI.equip('default')">🤖 <br>Robot (Varsayılan)</div>`;
+                grid.innerHTML = `<div class="shop-item" onclick="UI.equip('default')">🤖<br>Robot</div>`;
                 this.shopItems.forEach(item => {
                     const owned = AppState.data.inventory.includes(item.id);
                     grid.innerHTML += `
-                    <div class="shop-item ${owned ? 'owned' : ''}" onclick="UI.buy('${item.id}', ${item.price})">
-                        <div style="font-size:30px">${item.icon}</div>
+                    <div class="shop-item" onclick="UI.buy('${item.id}', ${item.price})">
+                        <div style="font-size:24px">${item.icon}</div>
                         <b>${item.name}</b><br>
-                        ${owned ? '<span style="color:green">Sahipsin</span>' : `<span style="color:orange">${item.price} XP</span>`}
+                        ${owned ? '<span style="color:green">✔</span>' : `<span style="color:orange">${item.price} XP</span>`}
                     </div>`;
                 });
             },
@@ -358,7 +411,6 @@
                     AppState.data.xp -= price;
                     AppState.data.inventory.push(id);
                     this.equip(id);
-                    this.showToast("Satın alındı!");
                     Confetti.fire();
                 } else {
                     this.showToast("Yetersiz XP!");
@@ -378,7 +430,7 @@
             showToast(msg) {
                 const t = document.getElementById('toast');
                 t.innerText = msg; t.classList.add('show');
-                setTimeout(()=>t.classList.remove('show'), 3000);
+                setTimeout(()=>t.classList.remove('show'), 2000);
             },
             
             toggleTheme(isDark) {
@@ -392,15 +444,15 @@
             ctx: document.getElementById('confetti').getContext('2d'),
             fire() {
                 this.canvas.width = window.innerWidth; this.canvas.height = window.innerHeight;
-                let particles = [];
-                for(let i=0; i<100; i++) particles.push({x:window.innerWidth/2, y:window.innerHeight/2, vx:(Math.random()-0.5)*20, vy:(Math.random()-0.5)*20, color:`hsl(${Math.random()*360},100%,50%)`});
+                let p = [];
+                for(let i=0; i<80; i++) p.push({x:window.innerWidth/2, y:window.innerHeight/2, vx:(Math.random()-0.5)*20, vy:(Math.random()-0.5)*20, c:`hsl(${Math.random()*360},100%,50%)`});
                 let i = 0;
-                const loop = () => {
+                const l = () => {
                     this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-                    particles.forEach(p => { p.x+=p.vx; p.y+=p.vy; this.ctx.fillStyle=p.color; this.ctx.fillRect(p.x,p.y,8,8); });
-                    if(i++ < 50) requestAnimationFrame(loop);
+                    p.forEach(x => { x.x+=x.vx; x.y+=x.vy; this.ctx.fillStyle=x.c; this.ctx.fillRect(x.x,x.y,6,6); });
+                    if(i++ < 40) requestAnimationFrame(l);
                 }
-                loop();
+                l();
             }
         };
 
