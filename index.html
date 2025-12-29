@@ -3,895 +3,326 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SimSimi Pro AI - Ultimate Edition</title>
+    <title>SimSimi Pro - Gemini AI Edition</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* --- 1. CORE VARIABLES & RESET --- */
+        /* --- CORE STYLES --- */
         :root {
-            --primary: #FFD700;
-            --primary-dark: #FFC107;
-            --secondary: #4ecdc4;
-            --accent: #ff6b6b;
-            --bg-color: #f0f2f5;
-            --chat-bg: #e5ddd5;
-            --text-main: #2d3436;
-            --text-light: #636e72;
+            --primary: #7c4dff; /* Gemini Moru */
+            --primary-dark: #651fff;
+            --secondary: #00e5ff;
+            --accent: #ff4081;
+            --bg-color: #f3f4f6;
+            --chat-bg: #e0e0e0;
+            --text-main: #263238;
             --white: #ffffff;
-            --shadow-sm: 0 2px 5px rgba(0,0,0,0.05);
-            --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
-            --radius-lg: 20px;
-            --radius-md: 12px;
-            --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+            --radius: 20px;
         }
 
-        /* Dark Mode Support Variables */
         [data-theme="dark"] {
-            --bg-color: #1a1a1a;
-            --chat-bg: #2d2d2d;
-            --text-main: #dfe6e9;
-            --text-light: #b2bec3;
-            --white: #2d3436;
-            --shadow-sm: 0 2px 5px rgba(0,0,0,0.3);
+            --bg-color: #121212;
+            --chat-bg: #1e1e1e;
+            --text-main: #eceff1;
+            --white: #2c2c2c;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; outline: none; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            font-family: var(--font-main);
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            transition: background 0.3s ease;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); height: 100vh; display: flex; flex-direction: column; overflow: hidden; color: var(--text-main); }
 
-        /* --- 2. HEADER & NAVIGATION --- */
+        /* --- HEADER --- */
         header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: var(--shadow-sm);
-            z-index: 100;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            background: rgba(255,255,255,0.9); backdrop-filter: blur(10px);
+            padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 100;
+        }
+        [data-theme="dark"] header { background: rgba(30,30,30,0.9); }
+
+        .bot-info { display: flex; align-items: center; gap: 12px; }
+        .avatar { 
+            width: 45px; height: 45px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            font-size: 24px; color: white; box-shadow: 0 4px 10px rgba(124, 77, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+        .stats h2 { font-size: 16px; margin: 0; }
+        .stats p { font-size: 11px; opacity: 0.7; }
+
+        .xp-bar { position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--primary), var(--secondary)); width: 0%; transition: width 0.5s; }
+
+        /* --- CHAT AREA --- */
+        #chat-box {
+            flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+            background: var(--chat-bg); background-image: radial-gradient(rgba(0,0,0,0.03) 1px, transparent 1px); background-size: 20px 20px;
         }
 
-        [data-theme="dark"] header { background: rgba(45, 52, 54, 0.95); border-bottom: 1px solid #444; }
-
-        .bot-profile { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .msg {
+            max-width: 85%; padding: 12px 18px; border-radius: 18px; font-size: 15px; line-height: 1.5;
+            position: relative; animation: slideIn 0.3s ease; word-wrap: break-word; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .msg.bot { align-self: flex-start; background: var(--white); border-bottom-left-radius: 4px; }
+        .msg.user { align-self: flex-end; background: var(--primary); color: white; border-bottom-right-radius: 4px; }
         
-        .avatar-wrapper { position: relative; }
-        .bot-avatar {
-            width: 50px; height: 50px;
-            background: var(--primary);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 26px;
-            border: 3px solid var(--white);
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .bot-avatar:hover { transform: scale(1.1) rotate(10deg); }
-        
-        .level-badge {
-            position: absolute; bottom: -2px; right: -2px;
-            background: var(--accent); color: white;
-            font-size: 10px; font-weight: bold;
-            padding: 2px 6px; border-radius: 10px;
-            border: 2px solid var(--white);
-        }
+        .time { font-size: 9px; opacity: 0.6; display: block; text-align: right; margin-top: 5px; }
 
-        .bot-stats h1 { font-size: 16px; margin: 0; }
-        .bot-stats p { font-size: 12px; color: var(--text-light); }
-
-        .header-actions { display: flex; gap: 10px; }
-        .icon-btn {
-            background: transparent; border: none;
-            font-size: 20px; color: var(--text-light);
-            cursor: pointer; padding: 8px;
-            border-radius: 50%; transition: 0.2s;
-        }
-        .icon-btn:hover { background: rgba(0,0,0,0.05); color: var(--primary-dark); }
-        .icon-btn.shop-btn { color: var(--secondary); position: relative; }
-        
-        .xp-bar-container {
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: transparent;
-        }
-        .xp-bar-fill {
-            height: 100%; background: linear-gradient(90deg, var(--primary), var(--accent));
-            width: 0%; transition: width 0.5s ease;
-        }
-
-        /* --- 3. CHAT AREA --- */
-        #chat-container {
-            flex: 1;
-            background-color: var(--chat-bg);
-            background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
-            background-size: 20px 20px;
-            padding: 20px;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            scroll-behavior: smooth;
-        }
-
-        .message {
-            max-width: 80%;
-            padding: 12px 18px;
-            border-radius: var(--radius-lg);
-            font-size: 15px;
-            line-height: 1.5;
-            position: relative;
-            animation: fadeIn Up 0.3s ease;
-            word-wrap: break-word;
-            box-shadow: var(--shadow-sm);
-        }
-
-        .message.bot {
-            align-self: flex-start;
-            background: var(--white);
-            color: var(--text-main);
-            border-bottom-left-radius: 4px;
-        }
-
-        .message.user {
-            align-self: flex-end;
-            background: var(--primary);
-            color: #4a4a4a;
-            border-bottom-right-radius: 4px;
-        }
-
-        .message .time {
-            font-size: 10px; opacity: 0.6;
-            display: block; text-align: right;
-            margin-top: 4px;
-        }
-
-        .typing-indicator {
-            align-self: flex-start;
-            background: var(--white);
-            padding: 10px 15px;
-            border-radius: 20px;
-            border-bottom-left-radius: 4px;
-            display: none;
-            gap: 5px;
-            margin-bottom: 10px;
-        }
-        .dot {
-            width: 8px; height: 8px;
-            background: #b2bec3; border-radius: 50%;
-            animation: bounceDot 1.4s infinite ease-in-out both;
-        }
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-
-        /* --- 4. INPUT AREA --- */
+        /* --- INPUT --- */
         .input-area {
-            background: var(--white);
-            padding: 15px;
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            border-top: 1px solid rgba(0,0,0,0.05);
-            z-index: 50;
+            background: var(--white); padding: 15px; display: flex; gap: 10px; align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
         }
-        
-        [data-theme="dark"] .input-area { background: #2d3436; border-top: 1px solid #444; }
-
-        .input-wrapper {
-            flex: 1; position: relative;
+        input {
+            flex: 1; padding: 14px; border: 2px solid transparent; background: var(--bg-color);
+            border-radius: 30px; font-size: 16px; color: var(--text-main); transition: 0.3s;
         }
-
-        #user-input {
-            width: 100%;
-            padding: 14px 20px;
-            border: 2px solid rgba(0,0,0,0.1);
-            border-radius: 30px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background: var(--bg-color);
-            color: var(--text-main);
+        input:focus { border-color: var(--primary); background: var(--white); }
+        button {
+            width: 50px; height: 50px; border: none; border-radius: 50%;
+            background: var(--primary); color: white; font-size: 20px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(124, 77, 255, 0.3);
         }
+        button:active { transform: scale(0.9); }
 
-        #user-input:focus { border-color: var(--primary); background: var(--white); }
-
-        #send-btn {
-            width: 50px; height: 50px;
-            border: none; border-radius: 50%;
-            background: var(--primary);
-            color: #4a4a4a; font-size: 20px;
-            cursor: pointer;
-            transition: transform 0.2s, background 0.2s;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: var(--shadow-md);
+        /* --- TYPING & TOAST --- */
+        .typing {
+            align-self: flex-start; background: var(--white); padding: 10px 15px;
+            border-radius: 20px; display: none; gap: 5px; margin-bottom: 10px;
         }
+        .dot { width: 6px; height: 6px; background: #bbb; border-radius: 50%; animation: bounce 1.4s infinite; }
+        .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
 
-        #send-btn:hover { transform: scale(1.05); background: var(--primary-dark); }
-        #send-btn:active { transform: scale(0.95); }
-
-        /* --- 5. MODALS (SHOP, SETTINGS, STATS) --- */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);
-            z-index: 1000;
-            display: none; opacity: 0;
-            transition: opacity 0.3s;
-            align-items: center; justify-content: center;
-        }
-
-        .modal-overlay.active { display: flex; opacity: 1; }
-
-        .modal {
-            background: var(--white);
-            width: 90%; max-width: 400px;
-            border-radius: var(--radius-lg);
-            padding: 25px;
-            transform: translateY(20px);
-            transition: transform 0.3s;
-            max-height: 80vh; overflow-y: auto;
-            box-shadow: var(--shadow-md);
-        }
-
-        .modal-overlay.active .modal { transform: translateY(0); }
-
-        .modal-header {
-            display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
-        }
-        
-        .modal-close { font-size: 24px; cursor: pointer; color: var(--text-light); }
-
-        /* Shop Grid */
-        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .shop-item {
-            border: 2px solid #eee; border-radius: 12px;
-            padding: 15px; text-align: center;
-            cursor: pointer; transition: 0.2s; position: relative;
-        }
-        .shop-item:hover { border-color: var(--primary); transform: translateY(-3px); }
-        .shop-item.purchased { border-color: #2ed573; background: rgba(46, 213, 115, 0.1); }
-        .shop-icon { font-size: 30px; margin-bottom: 10px; display: block; }
-        .shop-price { font-size: 12px; font-weight: bold; color: var(--accent); }
-        .shop-name { font-size: 14px; margin-bottom: 5px; display: block; }
-
-        /* Settings List */
-        .settings-list { display: flex; flex-direction: column; gap: 15px; }
-        .setting-item {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 10px 0; border-bottom: 1px solid #eee;
-        }
-
-        /* --- 6. ACHIEVEMENTS & TOASTS --- */
         .toast {
-            position: fixed; top: 80px; left: 50%;
-            transform: translateX(-50%) translateY(-20px);
-            background: #333; color: white;
-            padding: 10px 20px; border-radius: 30px;
-            font-size: 13px; opacity: 0; pointer-events: none;
-            transition: all 0.4s; z-index: 2000;
-            display: flex; align-items: center; gap: 8px;
-            box-shadow: var(--shadow-md);
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            background: #323232; color: white; padding: 10px 20px; border-radius: 30px;
+            font-size: 13px; opacity: 0; pointer-events: none; transition: 0.3s; z-index: 200;
         }
-        .toast.active { transform: translateX(-50%) translateY(0); opacity: 1; }
-        .toast.success { background: #2ed573; }
-        .toast.achievement { background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; font-weight: bold; border: 2px solid white;}
+        .toast.show { opacity: 1; top: 80px; }
 
-        /* --- 7. ANIMATIONS --- */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        @keyframes bounceDot { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        /* --- ANIMATIONS --- */
+        @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bounce { 0%, 80%, 100% { transform: translateY(0); } 40% { transform: translateY(-5px); } }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(124, 77, 255, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(124, 77, 255, 0); } 100% { box-shadow: 0 0 0 0 rgba(124, 77, 255, 0); } }
         
         /* Confetti Canvas */
-        #confetti-canvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 9999;
-        }
-
-        /* --- 8. UTILITIES --- */
-        .btn-full {
-            width: 100%; padding: 12px; border: none;
-            background: var(--text-main); color: white;
-            border-radius: 10px; cursor: pointer; margin-top: 10px;
-        }
-        .text-danger { color: #ff6b6b; }
-        .switch {
-            position: relative; display: inline-block; width: 40px; height: 20px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #ccc; transition: .4s; border-radius: 20px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 16px; width: 16px;
-            left: 2px; bottom: 2px; background-color: white;
-            transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
-
+        #confetti { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 999; }
     </style>
 </head>
 <body>
-
-    <canvas id="confetti-canvas"></canvas>
+    <canvas id="confetti"></canvas>
 
     <header>
-        <div class="bot-profile" onclick="uiManager.openModal('stats-modal')">
-            <div class="avatar-wrapper">
-                <div class="bot-avatar" id="avatar-display">🐥</div>
-                <div class="level-badge" id="lvl-badge">Lvl 1</div>
-            </div>
-            <div class="bot-stats">
-                <h1 id="bot-name">SimSimi Pro</h1>
-                <p id="xp-text">0 / 50 XP</p>
+        <div class="bot-info">
+            <div class="avatar"><i class="fas fa-robot"></i></div>
+            <div class="stats">
+                <h2>Gemini Pro</h2>
+                <p id="level-txt">Seviye 1 | Başlangıç</p>
             </div>
         </div>
-        <div class="header-actions">
-            <button class="icon-btn shop-btn" onclick="uiManager.openModal('shop-modal')">
-                <i class="fas fa-store"></i>
-            </button>
-            <button class="icon-btn" onclick="uiManager.openModal('settings-modal')">
-                <i class="fas fa-cog"></i>
-            </button>
-        </div>
-        <div class="xp-bar-container">
-            <div class="xp-bar-fill" id="xp-bar"></div>
-        </div>
+        <div class="xp-bar" id="xp-bar"></div>
     </header>
 
-    <div id="chat-container">
-        <div class="message bot">
-            Selam insan! Ben SimSimi Pro. Seninle konuşarak gelişen ultra zeki bir varlığım. Marketten bana kıyafet alabilir, seviyemi yükseltebilirsin. Hadi konuşalım! 💛
-            <span class="time">Sistem</span>
+    <div id="chat-box">
+        <div class="msg bot">
+            Merhaba! Ben Google Gemini tabanlı yeni nesil yapay zekayım. 🧠<br>
+            Bana matematik sorabilir, kod yazdırabilir veya sadece sohbet edebilirsin. Ne konuşalım? ✨
+            <span class="time">Şimdi</span>
         </div>
     </div>
 
-    <div class="typing-indicator" id="typing">
+    <div class="typing" id="typing">
         <div class="dot"></div><div class="dot"></div><div class="dot"></div>
     </div>
 
     <div class="input-area">
-        <div class="input-wrapper">
-            <input type="text" id="user-input" placeholder="Bir şeyler yaz..." autocomplete="off">
-        </div>
-        <button id="send-btn"><i class="fas fa-paper-plane"></i></button>
+        <input type="text" id="input" placeholder="Bir şeyler sor..." autocomplete="off">
+        <button id="send"><i class="fas fa-paper-plane"></i></button>
     </div>
 
-    <div class="modal-overlay" id="shop-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-store"></i> XP Marketi</h2>
-                <span class="modal-close" onclick="uiManager.closeModal('shop-modal')">&times;</span>
-            </div>
-            <p style="margin-bottom: 15px; font-size: 14px; color: #666;">XP harcayarak botun görünümünü değiştir.</p>
-            <div class="shop-grid" id="shop-grid">
-                </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="settings-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-cog"></i> Ayarlar</h2>
-                <span class="modal-close" onclick="uiManager.closeModal('settings-modal')">&times;</span>
-            </div>
-            <div class="settings-list">
-                <div class="setting-item">
-                    <span>Karanlık Mod</span>
-                    <label class="switch">
-                        <input type="checkbox" id="theme-toggle">
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <span>Hızlı Öğrenme Modu</span>
-                    <label class="switch">
-                        <input type="checkbox" id="fast-learn-toggle" checked>
-                        <span class="slider"></span>
-                    </label>
-                </div>
-                <div class="setting-item">
-                    <button class="btn-full text-danger" onclick="gameSystem.resetData()">
-                        <i class="fas fa-trash"></i> Her Şeyi Sıfırla
-                    </button>
-                </div>
-                <div class="setting-item">
-                    <button class="btn-full" onclick="brainEngine.exportBrain()">
-                        <i class="fas fa-file-export"></i> Beyni Dışa Aktar (Konsol)
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal-overlay" id="stats-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-chart-bar"></i> İstatistikler</h2>
-                <span class="modal-close" onclick="uiManager.closeModal('stats-modal')">&times;</span>
-            </div>
-            <div class="settings-list">
-                <div class="setting-item">
-                    <strong>Toplam Mesaj:</strong>
-                    <span id="stat-msg">0</span>
-                </div>
-                <div class="setting-item">
-                    <strong>Öğrenilen Kelime:</strong>
-                    <span id="stat-words">0</span>
-                </div>
-                <div class="setting-item">
-                    <strong>Mevcut XP:</strong>
-                    <span id="stat-xp">0</span>
-                </div>
-                <div class="setting-item">
-                    <strong>Başarımlar:</strong>
-                    <span id="stat-achs">0 / 10</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="toast" id="toast">
-        <i class="fas fa-info-circle"></i> <span id="toast-msg">Mesaj</span>
-    </div>
+    <div class="toast" id="toast">XP Kazanıldı!</div>
 
     <script>
-        /**
-         * =========================================================
-         * MODÜL 1: KONFETİ MOTORU (Görsel Efektler)
-         * =========================================================
-         */
-        const ConfettiEngine = {
-            canvas: document.getElementById('confetti-canvas'),
-            ctx: document.getElementById('confetti-canvas').getContext('2d'),
-            particles: [],
-            isActive: false,
-
-            init() {
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
-            },
-
-            resize() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
-            },
-
-            fire() {
-                this.particles = [];
-                const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'];
-                for (let i = 0; i < 150; i++) {
-                    this.particles.push({
-                        x: window.innerWidth / 2,
-                        y: window.innerHeight / 2,
-                        w: Math.random() * 10 + 5,
-                        h: Math.random() * 10 + 5,
-                        vx: (Math.random() - 0.5) * 20,
-                        vy: (Math.random() - 0.5) * 20,
-                        c: colors[Math.floor(Math.random() * colors.length)],
-                        g: 0.5,
-                        r: Math.random() * 360
-                    });
-                }
-                this.isActive = true;
-                this.animate();
-                setTimeout(() => this.isActive = false, 3000);
-            },
-
-            animate() {
-                if (!this.isActive) {
-                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                    return;
-                }
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.particles.forEach((p, i) => {
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vy += p.g; // Gravity
-                    p.r += 10;
-                    
-                    this.ctx.save();
-                    this.ctx.translate(p.x, p.y);
-                    this.ctx.rotate(p.r * Math.PI / 180);
-                    this.ctx.fillStyle = p.c;
-                    this.ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-                    this.ctx.restore();
-
-                    if(p.y > window.innerHeight) this.particles.splice(i, 1);
-                });
-                requestAnimationFrame(() => this.animate());
-            }
+        // --- 1. SİSTEM AYARLARI ---
+        const AppState = {
+            level: 1,
+            xp: 0,
+            xpReq: 50,
+            history: [] // Sohbet geçmişini tutar (bağlam için)
         };
 
-        /**
-         * =========================================================
-         * MODÜL 2: OYUN & VERİ SİSTEMİ (XP, Shop, Save)
-         * =========================================================
-         */
-        const GameSystem = {
-            data: {
-                level: 1,
-                xp: 0,
-                xpReq: 100,
-                totalMessages: 0,
-                inventory: ['default'],
-                equippedAvatar: 'default',
-                theme: 'light',
-                achievements: []
-            },
-            
-            shopItems: [
-                { id: 'robot', name: 'Robo-Bot', icon: '🤖', price: 200 },
-                { id: 'alien', name: 'Uzaylı Dost', icon: '👽', price: 500 },
-                { id: 'ghost', name: 'Hayalet', icon: '👻', price: 1000 },
-                { id: 'devil', name: 'Şeytani', icon: '😈', price: 2000 },
-                { id: 'king',  name: 'Kral', icon: '👑', price: 5000 },
-                { id: 'cat',   name: 'Kedi Modu', icon: '🐱', price: 300 }
-            ],
-
-            init() {
-                const saved = localStorage.getItem('simProData');
-                if (saved) {
-                    this.data = { ...this.data, ...JSON.parse(saved) };
-                }
-                this.applySettings();
-                this.renderShop();
-            },
-
-            save() {
-                localStorage.setItem('simProData', JSON.stringify(this.data));
-            },
-
-            addXP(amount) {
-                this.data.xp += amount;
-                this.checkLevelUp();
-                this.save();
-                uiManager.updateStatsUI();
-            },
-
-            checkLevelUp() {
-                if (this.data.xp >= this.data.xpReq) {
-                    this.data.level++;
-                    this.data.xp -= this.data.xpReq;
-                    this.data.xpReq = Math.floor(this.data.xpReq * 1.5);
-                    
-                    uiManager.showToast(`TEBRİKLER! Seviye ${this.data.level} oldun!`, 'achievement');
-                    uiManager.addMessage(`🎉 SEVİYE ATLADIM! Artık Seviye ${this.data.level} zekasındayım.`, 'bot');
-                    ConfettiEngine.fire();
-                    this.checkAchievements();
-                }
-            },
-
-            buyItem(itemId) {
-                const item = this.shopItems.find(i => i.id === itemId);
-                if (!item) return;
-
-                if (this.data.inventory.includes(itemId)) {
-                    // Zaten var, kuşan
-                    this.data.equippedAvatar = itemId;
-                    this.save();
-                    this.renderShop(); // UI güncelle
-                    uiManager.showToast(`${item.icon} ${item.name} kuşandı!`, 'success');
-                    uiManager.updateAvatar();
-                } else {
-                    // Satın al
-                    if (this.data.xp >= item.price) {
-                        this.data.xp -= item.price;
-                        this.data.inventory.push(itemId);
-                        this.data.equippedAvatar = itemId;
-                        this.save();
-                        this.renderShop();
-                        uiManager.updateStatsUI();
-                        uiManager.updateAvatar();
-                        uiManager.showToast('Satın alma başarılı!', 'success');
-                        ConfettiEngine.fire();
-                    } else {
-                        uiManager.showToast('Yetersiz XP!', 'error');
-                    }
-                }
-            },
-
-            renderShop() {
-                const grid = document.getElementById('shop-grid');
-                grid.innerHTML = '';
-                
-                // Default item
-                const defDiv = document.createElement('div');
-                defDiv.className = `shop-item ${this.data.equippedAvatar === 'default' ? 'purchased' : ''}`;
-                defDiv.innerHTML = `<span class="shop-icon">🐥</span><span class="shop-name">Orijinal</span><span class="shop-price">Sahipsin</span>`;
-                defDiv.onclick = () => { this.data.equippedAvatar = 'default'; this.save(); this.renderShop(); uiManager.updateAvatar(); };
-                grid.appendChild(defDiv);
-
-                this.shopItems.forEach(item => {
-                    const owned = this.data.inventory.includes(item.id);
-                    const equipped = this.data.equippedAvatar === item.id;
-                    const div = document.createElement('div');
-                    div.className = `shop-item ${equipped ? 'purchased' : ''}`;
-                    div.innerHTML = `
-                        <span class="shop-icon">${item.icon}</span>
-                        <span class="shop-name">${item.name}</span>
-                        <span class="shop-price">${owned ? (equipped ? 'Kuşanıldı' : 'Kuşan') : item.price + ' XP'}</span>
-                    `;
-                    div.onclick = () => this.buyItem(item.id);
-                    grid.appendChild(div);
-                });
-            },
-
-            resetData() {
-                if(confirm("Tüm ilerlemen, XP ve öğretilen kelimeler silinecek. Emin misin?")) {
-                    localStorage.removeItem('simProData');
-                    localStorage.removeItem('simProBrain');
-                    location.reload();
-                }
-            },
-
-            checkAchievements() {
-                // Basit başarım kontrolü
-                const list = [
-                    { id: 'first_word', text: 'İlk Öğretmen', condition: () => BrainEngine.wordCount() >= 1 },
-                    { id: 'level_5', text: 'Çırak', condition: () => this.data.level >= 5 },
-                    { id: 'rich', text: 'Zengin', condition: () => this.data.xp >= 1000 }
-                ];
-
-                list.forEach(ach => {
-                    if (!this.data.achievements.includes(ach.id) && ach.condition()) {
-                        this.data.achievements.push(ach.id);
-                        uiManager.showToast(`🏆 Başarım Açıldı: ${ach.text}`, 'achievement');
-                        this.save();
-                    }
-                });
-            },
-            
-            applySettings() {
-                if(this.data.theme === 'dark') {
-                    document.body.setAttribute('data-theme', 'dark');
-                    document.getElementById('theme-toggle').checked = true;
-                }
-            }
-        };
-
-        /**
-         * =========================================================
-         * MODÜL 3: BEYİN MOTORU (Logic & Fuzzy Matching)
-         * =========================================================
-         */
+        // --- 2. GEMINI AI MOTORU ---
         const BrainEngine = {
-            memory: {
-                "merhaba": ["Selam!", "Hoş geldin insan.", "Merhaba canım!"],
-                "nasılsın": ["Harikayım, sen nasılsın?", "Kodlarım tıkırında.", "Biraz yorgunum ama iyiyim."],
-                "adın ne": ["Ben SimSimi Pro.", "İsmim yok ama bana Kral diyorlar."],
-                "seni kim yaptı": ["Senin gibi zeki birisi.", "Üstün bir zeka tarafından kodlandım."]
-            },
-            pendingQuestion: null, // Botun cevap veremediği soru
+            apiKey: "AIzaSyB7BvLeZ-ZJurhoimp82jn3WLItXFB3xeo", // Kullanıcının Anahtarı
+            
+            // Botun Kişiliği: Zeki ama samimi
+            systemPrompt: `Senin adın SimSimi Pro (Gemini Sürümü). 
+            Sen çok zeki, yardımsever, esprili ve emojileri seven bir yapay zekasın.
+            Kullanıcıyla arkadaşça konuş. Cevapların net ve açıklayıcı olsun. 
+            Matematik, kodlama, tarih, felsefe her konuda uzmansın.
+            Kullanıcıyı asla yargılama, her zaman pozitif ol.`,
 
-            init() {
-                const savedBrain = localStorage.getItem('simProBrain');
-                if (savedBrain) {
-                    this.memory = JSON.parse(savedBrain);
-                }
-            },
-
-            save() {
-                localStorage.setItem('simProBrain', JSON.stringify(this.memory));
-            },
-
-            wordCount() {
-                return Object.keys(this.memory).length;
-            },
-
-            // Yazım hatalarını toleranslı karşılamak için Levenshtein Algoritması
-            levenshtein(a, b) {
-                const matrix = [];
-                for (let i = 0; i <= b.length; i++) { matrix[i] = [i]; }
-                for (let j = 0; j <= a.length; j++) { matrix[0][j] = j; }
-                for (let i = 1; i <= b.length; i++) {
-                    for (let j = 1; j <= a.length; j++) {
-                        if (b.charAt(i - 1) == a.charAt(j - 1)) {
-                            matrix[i][j] = matrix[i - 1][j - 1];
-                        } else {
-                            matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, Math.min(matrix[i][j - 1] + 1, matrix[i - 1][j] + 1));
-                        }
-                    }
-                }
-                return matrix[b.length][a.length];
-            },
-
-            findBestMatch(input) {
-                const keys = Object.keys(this.memory);
-                let bestMatch = null;
-                let lowestDistance = 999;
-
-                keys.forEach(key => {
-                    const dist = this.levenshtein(input, key);
-                    // Kelime uzunluğuna göre tolerans (Uzun kelimede daha çok hata payı)
-                    const tolerance = Math.floor(key.length * 0.4); 
-                    
-                    if (dist <= tolerance && dist < lowestDistance) {
-                        lowestDistance = dist;
-                        bestMatch = key;
-                    }
-                });
-
-                return bestMatch;
-            },
-
-            process(text) {
-                const cleanText = text.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g,"");
+            async process(text) {
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${this.apiKey}`;
                 
-                // 1. Öğrenme Modu (Eğer bekleyen soru varsa)
-                if (this.pendingQuestion) {
-                    if (!this.memory[this.pendingQuestion]) {
-                        this.memory[this.pendingQuestion] = [];
-                    }
-                    // Aynı cevabı tekrar ekleme
-                    if (!this.memory[this.pendingQuestion].includes(text)) {
-                        this.memory[this.pendingQuestion].push(text);
-                        this.save();
-                        GameSystem.addXP(25); // Öğretme ödülü
-                        GameSystem.checkAchievements();
-                        
-                        uiManager.addMessage(`Bunu kaydettim! ("${this.pendingQuestion}" -> "${text}")`, 'bot');
-                    } else {
-                        uiManager.addMessage("Bunu zaten biliyordum.", 'bot');
-                    }
-                    this.pendingQuestion = null;
-                    return;
+                // Sohbet Geçmişini Hazırla (Bağlamı korumak için)
+                // Son 5 mesajı hafızada tutuyoruz ki konu dağılmasın
+                let conversationHistory = this.systemPrompt + "\n";
+                AppState.history.slice(-5).forEach(msg => {
+                    conversationHistory += `${msg.role === 'user' ? 'Kullanıcı' : 'Sen'}: ${msg.text}\n`;
+                });
+                conversationHistory += `Kullanıcı: ${text}\nSen:`;
+
+                const requestBody = {
+                    contents: [{
+                        parts: [{ text: conversationHistory }]
+                    }]
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(requestBody)
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) throw new Error(data.error.message);
+
+                    const reply = data.candidates[0].content.parts[0].text;
+                    
+                    // Hafızaya ekle
+                    AppState.history.push({role: 'user', text: text});
+                    AppState.history.push({role: 'bot', text: reply});
+
+                    return reply;
+
+                } catch (error) {
+                    console.error("API Error:", error);
+                    return "Şu an beynim biraz yoğun... İnternetini kontrol et veya API kotan dolmuş olabilir. 🤯";
                 }
-
-                // 2. Cevaplama Modu
-                const match = this.findBestMatch(cleanText);
-
-                if (match) {
-                    const answers = this.memory[match];
-                    const randomAnswer = answers[Math.floor(Math.random() * answers.length)];
-                    setTimeout(() => {
-                        uiManager.addMessage(randomAnswer, 'bot');
-                        GameSystem.addXP(5); // Sohbet ödülü
-                    }, 600 + Math.random() * 500); // Doğal gecikme
-                } else {
-                    // Bilmiyor
-                    this.pendingQuestion = cleanText;
-                    setTimeout(() => {
-                        uiManager.addMessage(`Bunu anlamadım. "${text}" diyene ne cevap vermeliyim?`, 'bot');
-                    }, 600);
-                }
-            },
-
-            exportBrain() {
-                console.log(JSON.stringify(this.memory));
-                alert("Beyin verisi konsola yazdırıldı (F12 -> Console).");
             }
         };
 
-        /**
-         * =========================================================
-         * MODÜL 4: UI YÖNETİCİSİ (DOM Manipulation)
-         * =========================================================
-         */
-        const uiManager = {
-            chatContainer: document.getElementById('chat-container'),
-            input: document.getElementById('user-input'),
-            typingIndicator: document.getElementById('typing'),
+        // --- 3. UI YÖNETİMİ ---
+        const UI = {
+            chatBox: document.getElementById('chat-box'),
+            input: document.getElementById('input'),
+            typing: document.getElementById('typing'),
 
-            init() {
-                this.updateStatsUI();
-                this.updateAvatar();
-                
-                // Event Listeners
-                document.getElementById('send-btn').addEventListener('click', () => this.handleSend());
-                this.input.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.handleSend(); });
-                
-                // Theme Toggle
-                document.getElementById('theme-toggle').addEventListener('change', (e) => {
-                    if(e.target.checked) {
-                        document.body.setAttribute('data-theme', 'dark');
-                        GameSystem.data.theme = 'dark';
-                    } else {
-                        document.body.removeAttribute('data-theme');
-                        GameSystem.data.theme = 'light';
-                    }
-                    GameSystem.save();
-                });
-            },
-
-            handleSend() {
-                const text = this.input.value.trim();
-                if (!text) return;
-                
-                this.addMessage(text, 'user');
-                this.input.value = '';
-                this.input.focus();
-
-                this.showTyping(true);
-                BrainEngine.process(text);
-                
-                GameSystem.data.totalMessages++;
-                GameSystem.save();
-            },
-
-            addMessage(text, sender) {
-                this.showTyping(false); // Yeni mesaj gelince typing'i gizle
-                
+            addMsg(text, type) {
                 const div = document.createElement('div');
-                div.className = `message ${sender}`;
-                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                div.innerHTML = `${text} <span class="time">${time}</span>`;
+                div.className = `msg ${type}`;
+                const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
                 
-                this.chatContainer.appendChild(div);
+                // Markdown benzeri basit formatlama ( **kalın** )
+                let formattedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
+                // Kod blokları için basit stil
+                formattedText = formattedText.replace(/```([\s\S]*?)```/g, '<pre style="background:#333;color:#fff;padding:10px;border-radius:5px;overflow-x:auto;">$1</pre>');
+                
+                div.innerHTML = `${formattedText} <span class="time">${time}</span>`;
+                this.chatBox.appendChild(div);
                 this.scrollToBottom();
-
-                // Bot yazıyorsa tekrar typing göster (eğer işlem bitmediyse logic halleder)
-                if (sender === 'user') this.showTyping(true);
             },
 
             showTyping(show) {
-                if (show) {
-                    this.chatContainer.appendChild(this.typingIndicator);
-                    this.typingIndicator.style.display = 'flex';
+                if(show) {
+                    this.chatBox.appendChild(this.typing);
+                    this.typing.style.display = 'flex';
                 } else {
-                    this.typingIndicator.style.display = 'none';
+                    this.typing.style.display = 'none';
                 }
                 this.scrollToBottom();
             },
 
             scrollToBottom() {
-                this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+                this.chatBox.scrollTop = this.chatBox.scrollHeight;
             },
 
-            updateStatsUI() {
-                const xpPercent = (GameSystem.data.xp / GameSystem.data.xpReq) * 100;
-                document.getElementById('xp-bar').style.width = `${xpPercent}%`;
-                document.getElementById('xp-text').innerText = `${GameSystem.data.xp} / ${GameSystem.data.xpReq} XP`;
-                document.getElementById('lvl-badge').innerText = `Lvl ${GameSystem.data.level}`;
+            updateXP(amount) {
+                AppState.xp += amount;
+                if(AppState.xp >= AppState.xpReq) {
+                    AppState.level++;
+                    AppState.xp = 0;
+                    AppState.xpReq = Math.floor(AppState.xpReq * 1.5);
+                    this.showToast(`🎉 Tebrikler! Seviye ${AppState.level} oldun!`);
+                    Confetti.fire();
+                }
                 
-                // Modal Stats
-                document.getElementById('stat-msg').innerText = GameSystem.data.totalMessages;
-                document.getElementById('stat-words').innerText = BrainEngine.wordCount();
-                document.getElementById('stat-xp').innerText = GameSystem.data.xp;
-                document.getElementById('stat-achs').innerText = `${GameSystem.data.achievements.length} / 10`;
-            },
-            
-            updateAvatar() {
-                const avatars = {
-                    'default': '🐥', 'robot': '🤖', 'alien': '👽', 
-                    'ghost': '👻', 'devil': '😈', 'king': '👑', 'cat': '🐱'
-                };
-                const icon = avatars[GameSystem.data.equippedAvatar] || '🐥';
-                document.getElementById('avatar-display').innerText = icon;
+                const percent = (AppState.xp / AppState.xpReq) * 100;
+                document.getElementById('xp-bar').style.width = `${percent}%`;
+                document.getElementById('level-txt').innerText = `Seviye ${AppState.level} | ${this.getTitle(AppState.level)}`;
             },
 
-            openModal(id) {
-                this.updateStatsUI();
-                document.getElementById(id).classList.add('active');
+            getTitle(level) {
+                if(level < 3) return "Çırak";
+                if(level < 6) return "Kalfa";
+                if(level < 10) return "Usta";
+                return "Yapay Zeka Tanrısı";
             },
 
-            closeModal(id) {
-                document.getElementById(id).classList.remove('active');
-            },
-
-            showToast(msg, type = 'info') {
-                const toast = document.getElementById('toast');
-                const span = document.getElementById('toast-msg');
-                toast.className = `toast ${type}`;
-                span.innerText = msg;
-                toast.classList.add('active');
-                setTimeout(() => toast.classList.remove('active'), 3000);
+            showToast(msg) {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 3000);
             }
         };
 
-        // --- BAŞLATMA ---
-        window.onload = () => {
-            ConfettiEngine.init();
-            GameSystem.init();
-            BrainEngine.init();
-            uiManager.init();
+        // --- 4. KONFETİ EFEKTİ ---
+        const Confetti = {
+            canvas: document.getElementById('confetti'),
+            ctx: document.getElementById('confetti').getContext('2d'),
+            particles: [],
+            
+            fire() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+                for(let i=0; i<100; i++) {
+                    this.particles.push({
+                        x: window.innerWidth/2, y: window.innerHeight/2,
+                        vx: (Math.random()-0.5)*20, vy: (Math.random()-0.5)*20,
+                        c: `hsl(${Math.random()*360}, 100%, 50%)`, life: 100
+                    });
+                }
+                this.animate();
+            },
+
+            animate() {
+                if(this.particles.length === 0) {
+                    this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                    return;
+                }
+                this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                this.particles.forEach((p, i) => {
+                    p.x += p.vx; p.y += p.vy; p.life--;
+                    this.ctx.fillStyle = p.c; this.ctx.fillRect(p.x, p.y, 8, 8);
+                    if(p.life <= 0) this.particles.splice(i, 1);
+                });
+                requestAnimationFrame(() => this.animate());
+            }
         };
+
+        // --- 5. OLAYLAR ---
+        async function handleSend() {
+            const text = UI.input.value.trim();
+            if(!text) return;
+
+            UI.addMsg(text, 'user');
+            UI.input.value = '';
+            UI.showTyping(true);
+
+            // Yapay Zekaya Sor
+            const reply = await BrainEngine.process(text);
+            
+            UI.showTyping(false);
+            UI.addMsg(reply, 'bot');
+            UI.updateXP(15); // Zeki cevaplar daha çok XP verir
+        }
+
+        document.getElementById('send').addEventListener('click', handleSend);
+        document.getElementById('input').addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') handleSend();
+        });
 
     </script>
 </body>
